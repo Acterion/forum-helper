@@ -40,7 +40,7 @@ export default function ThreadView({ submissionId }: ThreadViewProps) {
     const [step, setStep] = useState(1);
     const [isComplete, setIsComplete] = useState(false);
     const [isAiLoading, setIsAiLoading] = useState(false);
-    let debounceTimeout = useRef<NodeJS.Timeout | null>(null);
+    const debounceTimeout = useRef<NodeJS.Timeout | null>(null);
 
     //case states
     const [casesList, setCasesList] = useState<string[]>([]);
@@ -101,7 +101,7 @@ export default function ThreadView({ submissionId }: ThreadViewProps) {
     const handleNextCase = async (e: React.FormEvent) => {
         e.preventDefault();
         console.log(actionSequence);
-        // await submitCase({...response, caseId: currentCaseId, preConfidence: confidence, postConfidence, replyText, aiSuggestion, actionSequence});
+        await submitCase({...response, caseId: currentCaseId, preConfidence: confidence, postConfidence, replyText, aiSuggestion, actionSequence});
         
         if (caseNumber < casesList.length - 1) {
             setCaseNumber(caseNumber + 1);
