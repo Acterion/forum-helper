@@ -24,7 +24,10 @@ export type Submission = {
         demographics: string;
         age: number;
     }
-    postQs?: {}
+    postQs?: {
+        q1: string;
+        q2: string;
+    }
 }
 
 export type CaseResponse = {

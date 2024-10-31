@@ -55,7 +55,7 @@ export default function ThreadView({ submissionId }: ThreadViewProps) {
         const cases = await getCases();
         setCasesList(cases);
         setCurrentCaseId(cases[caseNumber]) 
-    }; fetchCases(); }, []); 
+    }; fetchCases(); }, [caseNumber]); 
 
     useEffect(() => { const fetchCase = async () => { setCurrentCase(await getCase(currentCaseId)); }; fetchCase(); }, [currentCaseId]);
     
@@ -65,7 +65,7 @@ export default function ThreadView({ submissionId }: ThreadViewProps) {
         if (replyText === '') alert('Please enter a response before using AI Assist');        
         const prompt = `
         Main post: ${JSON.stringify({author: currentCase.mainPost.author, content: currentCase.mainPost.content})}, 
-        Thread replies: ${JSON.stringify(currentCase.replies.map(r => {r.author, r.content}))}
+        Thread replies: ${JSON.stringify(currentCase.replies.map(r => ({author: r.author, content: r.content})))}
         User's reply: ${replyText}
         `;
         createAiResponse(prompt).then((res) => {
@@ -157,7 +157,7 @@ export default function ThreadView({ submissionId }: ThreadViewProps) {
                     </textarea>
                 </>
             )}
-            <button onClick={() => {replyText ? handleNextStep() : alert("Response can't be empty")}} className="w-full py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+            <button onClick={() => (replyText ? handleNextStep() : alert("Response can't be empty"))} className="w-full py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
               Proceed
             </button>
           </>

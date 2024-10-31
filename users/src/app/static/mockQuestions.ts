@@ -1,6 +1,6 @@
-import { ForumThreadQuestion } from "@/types"
+import { Case } from "@/types"
 
-export const mockQuestions: ForumThreadQuestion[] = [
+export const mockQuestions: Case[] = [
     {
       id: "1",
       mainPost: {
@@ -23,10 +23,6 @@ export const mockQuestions: ForumThreadQuestion[] = [
           timestamp: "45 minutes ago"
         }
       ],
-      suggestedReplies: [
-        "Focus on learning React hooks and functional components, as they're the modern way of writing React applications.",
-        "Start by mastering JavaScript fundamentals before diving into React. A solid JS foundation will make learning React much easier."
-      ]
     },
     {
       id: "2",
@@ -49,10 +45,6 @@ export const mockQuestions: ForumThreadQuestion[] = [
           content: "I still prefer writing custom CSS for most projects, but I use Material-UI for rapid prototyping.",
           timestamp: "1 hour ago"
         }
-      ],
-      suggestedReplies: [
-        "Tailwind CSS is great for rapid development and maintaining consistent designs across large projects.",
-        "CSS-in-JS solutions like styled-components offer a great balance between flexibility and component-based styling."
       ]
     },
     {
@@ -76,10 +68,6 @@ export const mockQuestions: ForumThreadQuestion[] = [
           content: "Lazy loading components and code splitting have given me the biggest performance gains.",
           timestamp: "2 hours ago"
         }
-      ],
-      suggestedReplies: [
-        "Implement virtualization for long lists using libraries like react-window or react-virtualized.",
-        "Focus on reducing unnecessary re-renders by properly managing state and using hooks like useCallback."
       ]
     }
   ]
