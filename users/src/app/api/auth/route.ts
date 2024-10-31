@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { checkUserEmail } from '@/lib/auth';
-import initDB from '../../../../tools/db/initDB';
+import initDB from '../../actions/initDB';
 
 export async function POST(request: NextRequest) {
     await initDB();
