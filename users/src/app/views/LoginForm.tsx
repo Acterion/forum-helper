@@ -17,8 +17,9 @@ export default function LoginForm() {
     try {
       const user = await checkUserEmail(email);
       if (user) {
-        await createSubmission({ id: v6(), userId: user.id, nda: true });
-        router.push(`/study/${user.id}/${v6()}`);
+        const newSubmissionId = v6();
+        await createSubmission({ id: newSubmissionId, userId: user.id, nda: true });
+        router.push(`/study/${user.id}/${newSubmissionId}`);
       } else {
         setError('Email not found in our database');
       }
@@ -27,26 +28,32 @@ export default function LoginForm() {
       setError('An error occurred. Please try again later.');
     }
   };
-
   return (
-    <form onSubmit={handleSubmit} className="max-w-md">
-      <div className="mb-4">
-        <label htmlFor="email" className="block mb-2">
-          Email:
-        </label>
-        <input
-          type="email"
-          id="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className="w-full p-2 border rounded text-gray-900"
-          required
-        />
-      </div>
-      {error && <p className="text-red-500 mb-4">{error}</p>}
-      <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded">
-        Start Study
-      </button>
-    </form>
+    <div className="flex items-center justify-center h-screen">
+      <form
+        onSubmit={handleSubmit}
+        className= "p-8 rounded-md shadow-md w-full max-w-md border border-gray-300"
+      >
+        <h2 className="text-2xl font-bold text-center mb-4">Welcome!</h2>
+        <div className="mb-4">
+          <input
+            id="email"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
+            placeholder="Enter your email"
+            required
+          />
+        </div>
+
+        <button
+          type="submit"
+          className="w-full bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+        >
+          Start Survey
+        </button>
+      </form>
+    </div>
   );
 }

@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import ProgressBar from '../components/ProgressBar';
 import ForumPost from '../components/ForumPost';
 import { Case, CaseResponse } from '@/types';
@@ -9,6 +9,7 @@ import { getCase, getCases, submitCase } from '@/actions/cases';
 import { createAiResponse } from '@/actions/ai';
 import Loading from '../components/Loading';
 import Complete from '../components/Complete';
+import LoadingDots from '@/components/LoadingDots';
 
 interface ThreadViewProps {
     userId: string;
@@ -33,11 +34,13 @@ export default function ThreadView({ submissionId }: ThreadViewProps) {
     const [aiSuggestion, setAiSuggestion] = useState('');
     const [comment, setComment] = useState('');
     const [postConfidence, setPostConfidence] = useState(1);
-    const [actionSequence, setActionSequence] = useState<{action: string, value: string}[]>([]);
+    const [actionSequence, setActionSequence] = useState<{ action: string, value: string }[]>([]);
 
     //util states
     const [step, setStep] = useState(1);
     const [isComplete, setIsComplete] = useState(false);
+    const [isAiLoading, setIsAiLoading] = useState(false);
+    let debounceTimeout = useRef<NodeJS.Timeout | null>(null);
 
     //case states
     const [casesList, setCasesList] = useState<string[]>([]);
@@ -61,7 +64,8 @@ export default function ThreadView({ submissionId }: ThreadViewProps) {
     if (!currentCase || casesList.length === 0) return (<Loading />);
 
     const handleAiAssist = async () => {
-        if (replyText === '') alert('Please enter a response before using AI Assist');        
+        if (replyText === '') alert('Please enter a response before using AI Assist');  
+        setIsAiLoading(true);    
         const prompt = `
         Main post: ${JSON.stringify({author: currentCase.mainPost.author, content: currentCase.mainPost.content})}, 
         Thread replies: ${JSON.stringify(currentCase.replies.map(r => ({author: r.author, content: r.content})))}
@@ -70,13 +74,18 @@ export default function ThreadView({ submissionId }: ThreadViewProps) {
         createAiResponse(prompt).then((res) => {
             setAiSuggestion(res!); 
             setActionSequence([...actionSequence, {action: "ai-assist", value: res!}]);
+            setIsAiLoading(false);
         });
         
     };
-
+    
     const handleReplyChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
         setReplyText(e.target.value);
-        setActionSequence([...actionSequence, {action: "manual-edit", value: e.target.value}]);
+
+        if (debounceTimeout.current) clearTimeout(debounceTimeout.current);
+        debounceTimeout.current = setTimeout(() => {
+            setActionSequence([...actionSequence, {action: "manual-edit", value: e.target.value}]);
+        }, 500);
     }
 
     const handleNextStep = () => setStep(step + 1);
@@ -86,11 +95,13 @@ export default function ThreadView({ submissionId }: ThreadViewProps) {
         setResponse(makeNewResponse(currentCaseId, submissionId));
         setComment('');
         setPostConfidence(1);
+        setActionSequence([]);
     };
 
     const handleNextCase = async (e: React.FormEvent) => {
         e.preventDefault();
-        await submitCase({...response, caseId: currentCaseId, preConfidence: confidence, postConfidence, replyText, aiSuggestion, actionSequence: []});
+        console.log(actionSequence);
+        // await submitCase({...response, caseId: currentCaseId, preConfidence: confidence, postConfidence, replyText, aiSuggestion, actionSequence});
         
         if (caseNumber < casesList.length - 1) {
             setCaseNumber(caseNumber + 1);
@@ -142,9 +153,9 @@ export default function ThreadView({ submissionId }: ThreadViewProps) {
             ></textarea>
             <button
               onClick={handleAiAssist}
-              className="w-full py-2 mb-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300"
+              className="w-full py-2 mb-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 min-h-10 flex items-center justify-center"
             >
-              Ask AI for help
+              {isAiLoading ? <LoadingDots/> : "Ask AI for help"}
             </button>
             {aiSuggestion && (
                 <>

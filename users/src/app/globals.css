@@ -19,3 +19,23 @@ body {
   background: var(--background);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* Bounce animation */
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-0.3rem);
+  }
+}
+
+.dot {
+  display: inline-block;
+  font-size: 1.5rem;
+  line-height: 0;
+}
+
+.animate-bounce {
+  animation: bounce 0.6s infinite ease-in-out;
+}

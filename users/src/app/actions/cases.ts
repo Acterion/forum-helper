@@ -21,12 +21,13 @@ export async function getCase(caseId: string) {
 }
 
 export async function submitCase(caseRes: CaseResponse) {
+    console.log(caseRes);
     await sql`
         INSERT INTO case_response (
             id, case_id, submission_id, pre_confidence, ai_suggestion, reply_text, post_confidence, action_sequence
         ) VALUES (
             ${caseRes.id}, ${caseRes.caseId}, ${caseRes.submissionId}, ${caseRes.preConfidence},
-            ${caseRes.aiSuggestion}, ${caseRes.replyText}, ${caseRes.postConfidence}, ${JSON.stringify(caseRes.actionSequence)}
+            ${caseRes.aiSuggestion}, ${caseRes.replyText}, ${caseRes.postConfidence}, ${JSON.stringify(caseRes.actionSequence)}::jsonb
         );
     `;
 }
