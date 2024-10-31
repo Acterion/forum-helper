@@ -1,20 +1,19 @@
 'use client';
 import { useEffect, useState } from 'react';
-import ProgressBar from './ProgressBar';
-import ForumPost from './ForumPost';
+import ProgressBar from '../components/ProgressBar';
+import ForumPost from '../components/ForumPost';
 import { Case, CaseResponse } from '@/types';
-import LikertScale from './LikertScale';
+import LikertScale from '../components/LikertScale';
 import { v6 as uuid } from 'uuid';
 import { getCase, getCases, submitCase } from '@/actions/cases';
 import { createAiResponse } from '@/actions/ai';
-import Loading from './Loading';
-import Complete from './Complete';
+import Loading from '../components/Loading';
+import Complete from '../components/Complete';
 
 interface ThreadViewProps {
     userId: string;
     submissionId: string;
 }
-
 
 const makeNewResponse = (caseId: string, submissionId: string): CaseResponse => ({
     id: uuid(),

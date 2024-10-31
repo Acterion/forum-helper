@@ -1,4 +1,4 @@
-import ThreadView from '@/components/ThreadView';
+import ThreadView from '@/views/ThreadView';
 
 export default async function StudyPage({ params }: { params: Promise<{ userId: string, submissionId: string }> }) {
   const {userId, submissionId} = await params;
