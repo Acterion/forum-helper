@@ -12,7 +12,7 @@ export async function getCase(caseId: string) {
     if (!caseId) return null;
     const response = await sql`SELECT * FROM case_t WHERE id = ${caseId};`;
     const caseData = response.rows[0] as { id: string, main_post: Post, replies: Post[] };
-    console.log(caseData.main_post);
+    
     return {
         id: caseData.id,
         mainPost: caseData.main_post,

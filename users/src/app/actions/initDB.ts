@@ -6,11 +6,11 @@ async function checkSchema() {
   // Define the expected tables and columns
   const expectedSchema = {
     user: ['id', 'email', 'last_login'],
-    case_t: ['id', 'mainPost', 'replies'],
-    submission: ['id', 'userId', 'nda', 'preQs', 'postQs'],
+    case_t: ['id', 'main_post', 'replies'],
+    submission: ['id', 'user_id', 'nda', 'pre_qs', 'post_qs'],
     case_response: [
-      'id', 'submissionId', 'caseId', 'preConfidence', 'aiSuggestion', 
-      'replyText', 'postConfidence', 'actionSequence'
+      'id', 'submission_id', 'case_id', 'pre_confidence', 'ai_suggestion', 
+      'reply_text', 'post_confidence', 'action_sequence'
     ]
   };
 
@@ -23,7 +23,7 @@ async function checkSchema() {
       WHERE table_name = ${table}
     `;
 
-    if (tableCheck.rows.length === 0) return false; // Table does not exist
+    if (tableCheck.rows.length === 0) {console.log(`${table} not found`); return false;} // Table does not exist
 
     // Check if each column exists in the table
     for (const column of columns) {
@@ -32,7 +32,7 @@ async function checkSchema() {
         FROM information_schema.columns 
         WHERE table_name = ${table} AND column_name = ${column}
       `;
-      if (columnCheck.rows.length === 0) return false; // Column does not exist
+      if (columnCheck.rows.length === 0) {console.log(`${column} in ${table} not found`); return false;} // Column does not exist
     }
   }
 
