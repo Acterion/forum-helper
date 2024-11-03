@@ -4,9 +4,10 @@ interface LikertScaleProps {
   label?: string;
   value: number | null;
   setValue: (value: number) => void;
+  inputProps?: React.InputHTMLAttributes<HTMLInputElement>;
 }
 
-export default function LikertScale({ value, setValue, label }: LikertScaleProps) {
+export default function LikertScale({ value, setValue, label, inputProps }: LikertScaleProps) {
   return (
     <div className="flex flex-col space-y-2 mb-4">
       <span className="font-semibold">{label ?? "Level:"}</span>
@@ -20,8 +21,8 @@ export default function LikertScale({ value, setValue, label }: LikertScaleProps
         style={{
           WebkitAppearance: "none",
           backgroundSize: "auto", // Ensures no fill effect
-          accentColor: value === null ? "gray" : undefined,
         }}
+        {...inputProps}
       />
       <div className="flex justify-between text-sm text-gray-500">
         {[1, 2, 3, 4, 5].map((level) => (
