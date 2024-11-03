@@ -10,7 +10,7 @@ async function checkSchema() {
     submission: ['id', 'user_id', 'nda', 'pre_qs', 'post_qs'],
     case_response: [
       'id', 'submission_id', 'case_id', 'pre_confidence', 'ai_suggestion', 
-      'reply_text', 'post_confidence', 'action_sequence'
+      'reply_text', 'post_confidence', 'post_stress', 'action_sequence'
     ]
   };
 
@@ -96,6 +96,7 @@ export default async function initDB() {
         ai_suggestion TEXT,
         reply_text TEXT,
         post_confidence INTEGER,
+        post_stress INTEGER,
         action_sequence JSONB -- JSON array for action sequence
       );
     `;

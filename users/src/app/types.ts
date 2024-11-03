@@ -16,14 +16,21 @@ export type Case = {
     replies: Post[];
 };
 
+export type PreQs = {
+    age: number;
+    gender: 'male' | 'female' | 'other' | "";
+    experience: 'none' | '<1 year' | '>=1 year' | ""
+    selfEfficacy1: number | null;
+    selfEfficacy2: number | null;
+    selfEfficacy3: number | null;
+    selfEfficacy4: number | null;
+}
+
 export type Submission = {
     id: string;
     userId: string;
     nda: boolean;
-    preQs?: {
-        demographics: string;
-        age: number;
-    }
+    preQs?: PreQs;
     postQs?: {
         q1: string;
         q2: string;
@@ -38,5 +45,6 @@ export type CaseResponse = {
     aiSuggestion: string;
     replyText: string;
     postConfidence: number;
+    postStress: number;
     actionSequence: {action: string, value: string}[];
 }
