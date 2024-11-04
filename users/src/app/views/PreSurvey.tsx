@@ -58,7 +58,7 @@ export default function PreSurvey({ userId, submissionId }: PreSurveyProps) {
               type="number"
               value={answers.age}
               onChange={(e) => handleChange("age", e.target.value)}
-              className="w-full p-2 border border-gray-300 rounded-md"
+              className="w-full p-2 border border-gray-300 rounded-md text-gray-900"
               placeholder="Enter your age"
               required
               min={18}
@@ -72,7 +72,7 @@ export default function PreSurvey({ userId, submissionId }: PreSurveyProps) {
               required
               value={answers.gender}
               onChange={(e) => handleChange("gender", e.target.value)}
-              className="w-full p-2 border border-gray-300 rounded-md">
+              className="w-full p-2 border border-gray-300 rounded-md text-gray-900">
               <option value="">Select...</option>
               <option value="female">Female</option>
               <option value="male">Male</option>
@@ -86,7 +86,7 @@ export default function PreSurvey({ userId, submissionId }: PreSurveyProps) {
               required
               value={answers.experience}
               onChange={(e) => handleChange("experience", e.target.value)}
-              className="w-full p-2 border border-gray-300 rounded-md">
+              className="w-full p-2 border border-gray-300 rounded-md text-gray-900">
               <option value="">Select...</option>
               <option value="none">No experience</option>
               <option value="<1 year">&lt;1 year</option>

@@ -10,19 +10,21 @@ import Complete from "../../components/Complete";
 import LoadingDots from "@/components/LoadingDots";
 import { useFormState } from "./useForm";
 import { useCaseState } from "./useCase";
+import { useRouter } from "next/navigation";
 
 interface ThreadViewProps {
   userId: string;
   submissionId: string;
 }
 
-export default function ThreadView({ submissionId }: ThreadViewProps) {
+export default function ThreadView({ userId, submissionId }: ThreadViewProps) {
   const { casesList, caseNumber, setCaseNumber, currentCaseId, setCurrentCaseId, currentCase, progress } =
     useCaseState();
   const { formState, updateFormState, resetForm, handleNextStep } = useFormState(currentCaseId, submissionId);
-  const [isComplete, setIsComplete] = useState(false);
   const [isAiLoading, setIsAiLoading] = useState(false);
   const debounceTimeout = useRef<NodeJS.Timeout | null>(null);
+
+  const router = useRouter();
 
   if (!currentCase || casesList.length === 0) return <Loading />;
 
@@ -78,14 +80,10 @@ export default function ThreadView({ submissionId }: ThreadViewProps) {
       setCaseNumber(caseNumber + 1);
       setCurrentCaseId(casesList[caseNumber + 1]);
     } else {
-      setIsComplete(true);
+      router.push(`/study/${userId}/${submissionId}/3`);
     }
     resetForm();
   };
-
-  if (isComplete) {
-    return <Complete />;
-  }
 
   return (
     <div className="w-full max-w-4xl mx-auto p-6 border rounded-lg space-y-4">
