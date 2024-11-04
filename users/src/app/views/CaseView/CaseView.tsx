@@ -6,7 +6,6 @@ import LikertScale from "../../components/LikertScale";
 import { submitCase } from "@/actions/cases";
 import { createAiResponse } from "@/actions/ai";
 import Loading from "../../components/Loading";
-import Complete from "../../components/Complete";
 import LoadingDots from "@/components/LoadingDots";
 import { useFormState } from "./useForm";
 import { useCaseState } from "./useCase";
