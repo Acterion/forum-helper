@@ -13,7 +13,7 @@ async function checkSchema() {
   const expectedSchema = {
     user: ["id", "email", "last_login"],
     case_t: ["id", "main_post", "replies"],
-    submission: ["id", "user_id", "nda", "pre_qs", "post_qs"],
+    submission: ["id", "nda", "pre_qs", "post_qs"],
     case_response: [
       "id",
       "submission_id",
@@ -99,7 +99,6 @@ export default async function initDB() {
   await sql`
       CREATE TABLE IF NOT EXISTS submission (
         id TEXT PRIMARY KEY,
-        user_id TEXT NOT NULL,
         nda BOOLEAN NOT NULL,
         pre_qs JSONB, -- JSON object for demographics and age
         post_qs JSONB -- JSON object for post survey questions

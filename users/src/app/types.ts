@@ -40,7 +40,6 @@ export type PostQs = {
 
 export type Submission = {
   id: string;
-  userId: string;
   nda: boolean;
   preQs?: PreQs;
   postQs?: PostQs;

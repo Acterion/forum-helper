@@ -6,8 +6,8 @@ import { Submission } from "@/types";
 export async function createSubmission(submission: Submission) {
   console.log(submission);
   await sql`
-        INSERT INTO submission (id, user_id, nda) 
-        VALUES (${submission.id}, ${submission.userId}, ${submission.nda});
+        INSERT INTO submission (id, nda) 
+        VALUES (${submission.id}, ${submission.nda});
     `;
 }
 
@@ -16,7 +16,6 @@ export async function getSubmission(submissionId: string) {
   const response = await sql`SELECT * FROM submission WHERE id = ${submissionId};`;
   const submissionData = response.rows[0] as {
     id: string;
-    user_id: string;
     nda: boolean;
     pre_qs: object;
     post_qs: object;
@@ -24,7 +23,6 @@ export async function getSubmission(submissionId: string) {
 
   return {
     id: submissionData.id,
-    userId: submissionData.user_id,
     nda: submissionData.nda,
     preQs: submissionData.pre_qs,
     postQs: submissionData.post_qs,

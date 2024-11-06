@@ -1,11 +1,11 @@
-import LoginForm from '@/views/LoginForm';
-import initDB from './actions/initDB';
+import Welcome from "@/views/Welcome";
+import initDB from "./actions/initDB";
 
 export default function Home() {
-    initDB();
+  initDB();
   return (
     <main className="container mx-auto p-6">
-      <LoginForm />
+      <Welcome />
     </main>
   );
 }

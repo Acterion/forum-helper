@@ -8,11 +8,10 @@ import { useRouter } from "next/navigation";
 import Loading from "@/components/Loading";
 
 interface PostSurveyProps {
-  userId: string;
   submissionId: string;
 }
 
-export default function PostSurvey({ userId, submissionId }: PostSurveyProps) {
+export default function PostSurvey({ submissionId }: PostSurveyProps) {
   const router = useRouter();
   const [answers, setAnswers] = useState<PostQs>({
     helpfulness: null,
@@ -44,7 +43,7 @@ export default function PostSurvey({ userId, submissionId }: PostSurveyProps) {
     e.preventDefault();
     e.currentTarget.checkValidity();
     updateSubmission({ ...submission, postQs: answers });
-    router.push(`/study/${userId}/${submissionId}/complete`);
+    router.push(`/study/${submissionId}/complete`);
   };
 
   return (

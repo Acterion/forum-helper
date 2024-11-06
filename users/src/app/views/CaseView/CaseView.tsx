@@ -12,11 +12,10 @@ import { useCaseState } from "./useCase";
 import { useRouter } from "next/navigation";
 
 interface ThreadViewProps {
-  userId: string;
   submissionId: string;
 }
 
-export default function ThreadView({ userId, submissionId }: ThreadViewProps) {
+export default function ThreadView({ submissionId }: ThreadViewProps) {
   const { casesList, caseNumber, setCaseNumber, currentCaseId, setCurrentCaseId, currentCase, progress } =
     useCaseState();
   const { formState, updateFormState, resetForm, handleNextStep } = useFormState(currentCaseId, submissionId);
@@ -79,7 +78,7 @@ export default function ThreadView({ userId, submissionId }: ThreadViewProps) {
       setCaseNumber(caseNumber + 1);
       setCurrentCaseId(casesList[caseNumber + 1]);
     } else {
-      router.push(`/study/${userId}/${submissionId}/3`);
+      router.push(`/study/${submissionId}/3`);
     }
     resetForm();
   };

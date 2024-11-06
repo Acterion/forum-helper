@@ -8,11 +8,10 @@ import { useRouter } from "next/navigation";
 import Loading from "@/components/Loading";
 
 interface PreSurveyProps {
-  userId: string;
   submissionId: string;
 }
 
-export default function PreSurvey({ userId, submissionId }: PreSurveyProps) {
+export default function PreSurvey({ submissionId }: PreSurveyProps) {
   const router = useRouter();
   // State object for all question answers
   const [answers, setAnswers] = useState<PreQs>({
@@ -43,7 +42,7 @@ export default function PreSurvey({ userId, submissionId }: PreSurveyProps) {
     e.preventDefault();
     e.currentTarget.checkValidity();
     updateSubmission({ ...submission, preQs: answers });
-    router.push(`/study/${userId}/${submissionId}/2`);
+    router.push(`/study/${submissionId}/2`);
   };
 
   return (
