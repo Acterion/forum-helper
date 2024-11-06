@@ -1,8 +1,14 @@
 "use server";
 
-import { sql } from "@vercel/postgres";
+import { sql } from "@/lib/db";
 
 async function checkSchema() {
+  await sql`
+    SELECT 1
+    FROM information_schema.tables
+    WHERE table_name = 'user'
+  `;
+
   // Define the expected tables and columns
   const expectedSchema = {
     user: ["id", "email", "last_login"],
