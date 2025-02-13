@@ -19,7 +19,7 @@ export default function ThreadView({ submissionId }: ThreadViewProps) {
   const { casesList, caseNumber, setCaseNumber, currentCaseId, setCurrentCaseId, currentCase, progress } =
     useCaseState();
   const { formState, updateFormState, resetForm, handleNextStep } = useFormState(currentCaseId, submissionId);
-  const [isAiLoading, setIsAiLoading] = useState(false);
+  // const [isAiLoading, setIsAiLoading] = useState(false);
   const debounceTimeout = useRef<NodeJS.Timeout | null>(null);
 
   const router = useRouter();
