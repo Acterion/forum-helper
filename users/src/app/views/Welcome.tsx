@@ -17,6 +17,7 @@ export default function Welcome() {
       await createSubmission({
         id: newSubmissionId,
         nda: true,
+        branch: "b",
       });
       router.push(`/study/${newSubmissionId}/1`);
     } catch (err) {

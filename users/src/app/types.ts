@@ -41,6 +41,7 @@ export type PostQs = {
 export type Submission = {
   id: string;
   nda: boolean;
+  branch: string;
   preQs?: PreQs;
   postQs?: PostQs;
 };

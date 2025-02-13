@@ -33,9 +33,9 @@ export async function updateSubmission(submission: Submission) {
   console.log(submission);
   await sql`
         UPDATE submission
-        SET (nda, pre_qs, post_qs) = (${submission.nda}, ${JSON.stringify(submission.preQs)}::jsonb, ${JSON.stringify(
-    submission.postQs
-  )}::jsonb)
+        SET (nda, branch, pre_qs, post_qs) = (${submission.nda}, ${submission.branch}, ${JSON.stringify(
+    submission.preQs
+  )}::jsonb, ${JSON.stringify(submission.postQs)}::jsonb)
         WHERE id = ${submission.id};
     `;
 }
