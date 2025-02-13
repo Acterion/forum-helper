@@ -118,7 +118,7 @@ export default function ThreadView({ submissionId }: ThreadViewProps) {
               onChange={(e) => handleReplyChange(e)}
               className="w-full h-32 p-3 border border-gray-300 rounded-md text-gray-900"
               placeholder="Type your response here..."></textarea>
-            <button
+            {/* <button
               onClick={handleAiAssist}
               className="w-full py-2 mb-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 min-h-10 flex items-center justify-center">
               {isAiLoading ? <LoadingDots /> : "Ask AI for help"}
@@ -131,7 +131,7 @@ export default function ThreadView({ submissionId }: ThreadViewProps) {
                   className="w-full h-32 p-3 border border-gray-300 rounded-md text-gray-900"
                   placeholder="AI suggestion is going to be here"></textarea>
               </>
-            )}
+            )} */}
             <button
               onClick={() => (formState.replyText ? handleNextStep() : alert("Response can't be empty"))}
               className="w-full py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
