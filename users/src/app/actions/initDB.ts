@@ -3,12 +3,6 @@
 import { sql } from "@/lib/db";
 
 async function checkSchema() {
-  await sql`
-    SELECT 1
-    FROM information_schema.tables
-    WHERE table_name = 'user'
-  `;
-
   // Define the expected tables and columns
   const expectedSchema = {
     user: ["id", "email", "last_login"],
@@ -122,10 +116,10 @@ export default async function initDB() {
   console.log("Inserting data...");
 
   // Insert initial data separately
-  await sql`
-      INSERT INTO "user" (id, email) VALUES ('xx1xx', 'test@test.com');
-      INSERT INTO "user" (id, email) VALUES ('axf1123cfg', 'danielly.depaula@hpi.de');
-    `;
+  // await sql`
+  //     INSERT INTO "user" (id, email) VALUES ('xx1xx', 'test@test.com');
+  //     INSERT INTO "user" (id, email) VALUES ('axf1123cfg', 'danielly.depaula@hpi.de');
+  //   `;
 
   await sql`
       INSERT INTO case_t (id, main_post, replies) VALUES (
