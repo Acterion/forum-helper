@@ -36,3 +36,7 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 .vscode/settings.json
+
+paper/
+
+users/src/tools/db/Seeker Posts \+ Answers - Sheet1.csv
