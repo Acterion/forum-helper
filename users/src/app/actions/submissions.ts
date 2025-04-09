@@ -6,8 +6,14 @@ import { Submission } from "@/types";
 export async function createSubmission(submission: Submission) {
   console.log(submission);
   await sql`
-        INSERT INTO submission (id, nda) 
-        VALUES (${submission.id}, ${submission.nda});
+        INSERT INTO submission (id, nda, prolific_pid, study_id, session_id) 
+        VALUES (
+          ${submission.id}, 
+          ${submission.nda}, 
+          ${submission.prolific_pid || null}, 
+          ${submission.study_id || null}, 
+          ${submission.session_id || null}
+        );
     `;
 }
 

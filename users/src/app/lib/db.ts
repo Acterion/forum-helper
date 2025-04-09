@@ -1,4 +1,4 @@
-import { neonConfig } from "@neondatabase/serverless";
+// import { neonConfig } from "@neondatabase/serverless";
 
 // if (process.env.VERCEL_ENV === "development") {
 //   console.log("Configuring neon");
