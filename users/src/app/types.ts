@@ -43,6 +43,9 @@ export type Submission = {
   nda: boolean;
   preQs?: PreQs;
   postQs?: PostQs;
+  prolific_pid?: string;
+  study_id?: string;
+  session_id?: string;
 };
 
 export type CaseResponse = {

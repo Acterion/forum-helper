@@ -1,13 +1,25 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { v6 } from "uuid";
 import { createSubmission } from "@/actions/submissions";
 
 export default function Welcome() {
   const [error, setError] = useState("");
   const router = useRouter();
+  const searchParams = useSearchParams();
+
+  // Capture Prolific params
+  const [prolificPid, setProlificPid] = useState<string | null>(null);
+  const [studyId, setStudyId] = useState<string | null>(null);
+  const [sessionId, setSessionId] = useState<string | null>(null);
+
+  useEffect(() => {
+    setProlificPid(searchParams.get("PROLIFIC_PID"));
+    setStudyId(searchParams.get("STUDY_ID"));
+    setSessionId(searchParams.get("SESSION_ID"));
+  }, [searchParams]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -17,6 +29,9 @@ export default function Welcome() {
       await createSubmission({
         id: newSubmissionId,
         nda: true,
+        prolific_pid: prolificPid ?? "",
+        study_id: studyId ?? "",
+        session_id: sessionId ?? "",
       });
       router.push(`/study/${newSubmissionId}/1`);
     } catch (err) {
