@@ -115,9 +115,20 @@ export default function ThreadView({ submissionId }: ThreadViewProps) {
             <h3 className="text-lg font-semibold">Write your response:</h3>
             <textarea
               value={formState.replyText}
-              onChange={(e) => handleReplyChange(e)}
-              className="w-full h-32 p-3 border border-gray-300 rounded-md text-gray-900"
-              placeholder="Type your response here..."></textarea>
+              onChange={(e) => {
+                handleReplyChange(e);
+                e.target.style.height = "auto";
+                e.target.style.height = `${e.target.scrollHeight}px`;
+              }}
+              className="w-full p-3 border border-gray-300 rounded-md text-gray-900"
+              placeholder="Type your response here..."
+              style={{ minHeight: "8rem", height: "auto", resize: "vertical" }}
+              ref={(el) => {
+                if (el) {
+                  el.style.height = "auto";
+                  el.style.height = `${el.scrollHeight}px`;
+                }
+              }}></textarea>
             <button
               onClick={handleAiAssist}
               className="w-full py-2 mb-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 min-h-10 flex items-center justify-center">
@@ -128,8 +139,15 @@ export default function ThreadView({ submissionId }: ThreadViewProps) {
                 <textarea
                   value={formState.aiSuggestion}
                   readOnly
-                  className="w-full h-32 p-3 border border-gray-300 rounded-md text-gray-900"
-                  placeholder="AI suggestion is going to be here"></textarea>
+                  className="w-full p-3 border border-gray-300 rounded-md text-gray-900"
+                  placeholder="AI suggestion is going to be here"
+                  style={{ minHeight: "8rem", height: "auto", resize: "vertical" }}
+                  ref={(el) => {
+                    if (el) {
+                      el.style.height = "auto";
+                      el.style.height = `${el.scrollHeight}px`;
+                    }
+                  }}></textarea>
               </>
             )}
             <button
