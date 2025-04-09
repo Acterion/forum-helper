@@ -4,9 +4,9 @@ import ProgressBar from "../../components/ProgressBar";
 import ForumPost from "../../components/ForumPost";
 import LikertScale from "../../components/LikertScale";
 import { submitCase } from "@/actions/cases";
-// import { createAiResponse } from "@/actions/ai";
+import { createAiResponse } from "@/actions/ai";
 import Loading from "../../components/Loading";
-// import LoadingDots from "@/components/LoadingDots";
+import LoadingDots from "@/components/LoadingDots";
 import { useFormState } from "./useForm";
 import { useCaseState } from "./useCase";
 import { useRouter } from "next/navigation";
@@ -19,36 +19,36 @@ export default function ThreadView({ submissionId }: ThreadViewProps) {
   const { casesList, caseNumber, setCaseNumber, currentCaseId, setCurrentCaseId, currentCase, progress } =
     useCaseState();
   const { formState, updateFormState, resetForm, handleNextStep } = useFormState(currentCaseId, submissionId);
-  // const [isAiLoading, setIsAiLoading] = useState(false);
+  const [isAiLoading, setIsAiLoading] = useState(false);
   const debounceTimeout = useRef<NodeJS.Timeout | null>(null);
 
   const router = useRouter();
 
   if (!currentCase || casesList.length === 0) return <Loading />;
 
-  // const handleAiAssist = async () => {
-  //   if (formState.replyText === "") {
-  //     alert("Please enter a response before using AI Assist");
-  //     return;
-  //   }
-  //   setIsAiLoading(true);
-  //   const prompt = `
-  //   Main post: ${JSON.stringify({
-  //     author: currentCase.mainPost.author,
-  //     content: currentCase.mainPost.content,
-  //   })},
-  //   Thread replies: ${JSON.stringify(currentCase.replies.map((r) => ({ author: r.author, content: r.content })))}
-  //   User's reply: ${formState.replyText}
-  //   `;
-  //   const res = await createAiResponse(prompt);
-  //   if (res) {
-  //     updateFormState({
-  //       aiSuggestion: res,
-  //       actionSequence: [...formState.actionSequence, { action: "ai-assist", value: res }],
-  //     });
-  //   }
-  //   setIsAiLoading(false);
-  // };
+  const handleAiAssist = async () => {
+    if (formState.replyText === "") {
+      alert("Please enter a response before using AI Assist");
+      return;
+    }
+    setIsAiLoading(true);
+    const prompt = `
+    Main post: ${JSON.stringify({
+      author: currentCase.mainPost.author,
+      content: currentCase.mainPost.content,
+    })},
+    Thread replies: ${JSON.stringify(currentCase.replies.map((r) => ({ author: r.author, content: r.content })))}
+    User's reply: ${formState.replyText}
+    `;
+    const res = await createAiResponse(prompt);
+    if (res) {
+      updateFormState({
+        aiSuggestion: res,
+        actionSequence: [...formState.actionSequence, { action: "ai-assist", value: res }],
+      });
+    }
+    setIsAiLoading(false);
+  };
 
   const handleReplyChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const newValue = e.target.value;
@@ -149,7 +149,7 @@ export default function ThreadView({ submissionId }: ThreadViewProps) {
                     }
                   }}></textarea>
               </>
-            )} */}
+            )}
             <button
               onClick={() => (formState.replyText ? handleNextStep() : alert("Response can't be empty"))}
               className="w-full py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">

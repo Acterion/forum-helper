@@ -41,7 +41,7 @@ export type PostQs = {
 export type Submission = {
   id: string;
   nda: boolean;
-  branch: string;
+  branch: "a" | "b";
   preQs?: PreQs;
   postQs?: PostQs;
   prolific_pid?: string;
