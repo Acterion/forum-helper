@@ -8,6 +8,7 @@ export default function Complete() {
     const prolificCompletionUrl =
       process.env.PROLIFIC_COMPLETION_URL || "https://app.prolific.com/submissions/complete?cc=C16GBRWH"; // Fallback URL
 
+    console.log(prolificCompletionUrl);
     if (
       prolificCompletionUrl &&
       prolificCompletionUrl !== "https://app.prolific.com/submissions/complete?cc=C16GBRWH"
