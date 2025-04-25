@@ -13,11 +13,13 @@ import { useRouter } from "next/navigation";
 
 interface ThreadViewProps {
   submissionId: string;
+  branch: "branch-a" | "branch-b";
 }
 
-export default function ThreadView({ submissionId }: ThreadViewProps) {
+export default function ThreadView({ submissionId, branch }: ThreadViewProps) {
   const { casesList, caseNumber, setCaseNumber, currentCaseId, setCurrentCaseId, currentCase, progress } =
     useCaseState();
+
   const { formState, updateFormState, resetForm, handleNextStep } = useFormState(currentCaseId, submissionId);
   const [isAiLoading, setIsAiLoading] = useState(false);
   const debounceTimeout = useRef<NodeJS.Timeout | null>(null);
@@ -31,12 +33,13 @@ export default function ThreadView({ submissionId }: ThreadViewProps) {
       alert("Please enter a response before using AI Assist");
       return;
     }
+    if (branch !== "branch-a") return; // only branch-a users get AI assist
     setIsAiLoading(true);
     const prompt = `
     Main post: ${JSON.stringify({
       author: currentCase.mainPost.author,
       content: currentCase.mainPost.content,
-    })}, 
+    })},
     Thread replies: ${JSON.stringify(currentCase.replies.map((r) => ({ author: r.author, content: r.content })))}
     User's reply: ${formState.replyText}
     `;
@@ -129,11 +132,13 @@ export default function ThreadView({ submissionId }: ThreadViewProps) {
                   el.style.height = `${el.scrollHeight}px`;
                 }
               }}></textarea>
-            <button
-              onClick={handleAiAssist}
-              className="w-full py-2 mb-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 min-h-10 flex items-center justify-center">
-              {isAiLoading ? <LoadingDots /> : "Ask AI for help"}
-            </button>
+            {branch === "branch-a" && (
+              <button
+                onClick={handleAiAssist}
+                className="w-full py-2 mb-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 min-h-10 flex items-center justify-center">
+                {isAiLoading ? <LoadingDots /> : "Ask AI for help"}
+              </button>
+            )}
             {formState.aiSuggestion && (
               <>
                 <textarea
