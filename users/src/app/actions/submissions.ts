@@ -3,7 +3,7 @@
 import { sql } from "@/lib/db";
 import { Submission } from "@/types";
 
-export async function createSubmission(submission: Submission) {
+export async function createSubmission(submission: Omit<Submission, "branch">) {
   // assign user to branch-a or branch-b based on existing counts
   const countsResult = await sql`SELECT branch, count FROM branch_counts WHERE branch IN ('branch-a','branch-b');`;
   const counts = countsResult.rows as { branch: string; count: number }[];

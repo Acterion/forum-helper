@@ -29,7 +29,6 @@ export default function Welcome() {
       await createSubmission({
         id: newSubmissionId,
         nda: true,
-        branch: "b",
         prolific_pid: prolificPid ?? "",
         study_id: studyId ?? "",
         session_id: sessionId ?? "",
