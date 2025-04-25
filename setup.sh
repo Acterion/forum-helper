@@ -31,6 +31,7 @@ touch app/study/[userId]/page.tsx
 
 # Install dependencies
 npm install sqlite3
+npm install -D tsx
 
-# Start the development server
-npm run dev
+# Initialize branch_counts table in the database
+npx tsx src/tools/db/initBranchCounts.ts
