@@ -4,9 +4,6 @@ import { v4 as uuidv4 } from "uuid";
 import { Case, Post } from "@/types";
 import { sql } from "@/lib/db";
 
-import dotenv from "dotenv";
-dotenv.config({ path: ".env.development.local" });
-
 const generateFakeAuthor = (): string => {
   const authors = ["Alice", "Bob", "Charlie", "Dave", "Eve"];
   return authors[Math.floor(Math.random() * authors.length)];
@@ -26,7 +23,6 @@ const importCasesFromCSV = (filePath: string): Promise<Case[]> => {
     fs.createReadStream(filePath)
       .pipe(csv({ separator: ";" }))
       .on("data", (row) => {
-        console.log(row);
         const mainPost: Post = {
           avatar: `https://i.pravatar.cc/150?img=${Math.floor(Math.random() * 70)}`,
           author: generateFakeAuthor(),
@@ -65,16 +61,6 @@ const importCasesFromCSV = (filePath: string): Promise<Case[]> => {
   });
 };
 
-// Example usage
-const filePath = "./src/tools/db/Seeker Posts + Answers - Sheet1.csv";
-importCasesFromCSV(filePath)
-  .then((cases) => {
-    console.dir(cases, { depth: 4 });
-  })
-  .catch((error) => {
-    console.error("Error importing cases:", error);
-  });
-
 const insertCases = async (cases: Case[]) => {
   for (const newCase of cases) {
     await sql`
@@ -84,10 +70,9 @@ const insertCases = async (cases: Case[]) => {
   }
 };
 
-const main = async () => {
+export async function importAndInsertCases() {
+  const filePath = "./src/tools/db/Seeker Posts + Answers - Sheet1.csv";
   const cases = await importCasesFromCSV(filePath);
-  await sql`DELETE FROM case_t WHERE id!='1';`;
+  await sql`DELETE FROM case_t;`;
   await insertCases(cases);
-};
-
-main();
+}

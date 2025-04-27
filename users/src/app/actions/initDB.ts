@@ -1,13 +1,24 @@
 "use server";
 
 import { sql } from "@/lib/db";
+import { importAndInsertCases } from "../../tools/db/importCases";
 
 async function checkSchema() {
   // Define the expected tables and columns
   const expectedSchema = {
-    user: ["id", "email", "last_login"],
+    user: ["id", "email"],
     case_t: ["id", "main_post", "replies"],
-    submission: ["id", "nda", "pre_qs", "post_qs", "branch"],
+    submission: [
+      "id",
+      "data_consent",
+      "debriefing_consent",
+      "branch",
+      "pre_qs",
+      "post_qs",
+      "prolific_pid",
+      "study_id",
+      "session_id",
+    ],
     case_response: [
       "id",
       "submission_id",
@@ -33,7 +44,7 @@ async function checkSchema() {
     if (tableCheck.rows.length === 0) {
       console.log(`${table} not found`);
       return false;
-    } // Table does not exist
+    }
 
     // Check if each column exists in the table
     for (const column of columns) {
@@ -45,7 +56,7 @@ async function checkSchema() {
       if (columnCheck.rows.length === 0) {
         console.log(`${column} in ${table} not found`);
         return false;
-      } // Column does not exist
+      }
     }
   }
 
@@ -66,10 +77,10 @@ export default async function initDB() {
   // console.log('Dropping tables...');
 
   // // Drop tables individually
-  //   await sql`DROP TABLE IF EXISTS "user";`;
-  //   await sql`DROP TABLE IF EXISTS case_t;`;
-  //   await sql`DROP TABLE IF EXISTS submission CASCADE;`;
-  //   await sql`DROP TABLE IF EXISTS case_response;`;
+  // await sql`DROP TABLE IF EXISTS "user";`;
+  // await sql`DROP TABLE IF EXISTS case_t;`;
+  await sql`DROP TABLE IF EXISTS submission CASCADE;`;
+  // await sql`DROP TABLE IF EXISTS case_response;`;
 
   console.log("Creating tables...");
 
@@ -77,8 +88,7 @@ export default async function initDB() {
   await sql`
       CREATE TABLE IF NOT EXISTS "user" (
         id TEXT PRIMARY KEY NOT NULL,
-        email TEXT UNIQUE NOT NULL,
-        last_login TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        email TEXT UNIQUE NOT NULL
       );
     `;
 
@@ -93,10 +103,14 @@ export default async function initDB() {
   await sql`
       CREATE TABLE IF NOT EXISTS submission (
         id TEXT PRIMARY KEY,
-        nda BOOLEAN NOT NULL,
+        data_consent BOOLEAN,
+        debriefing_consent BOOLEAN,
         branch TEXT,
-        pre_qs JSONB, -- JSON object for demographics and age
-        post_qs JSONB -- JSON object for post survey questions
+        pre_qs JSONB,
+        post_qs JSONB,
+        prolific_pid TEXT,
+        study_id TEXT,
+        session_id TEXT
       );
     `;
 
@@ -114,40 +128,24 @@ export default async function initDB() {
       );
     `;
 
-  console.log("Inserting data...");
-
-  // Insert initial data separately
-  // await sql`
-  //     INSERT INTO "user" (id, email) VALUES ('xx1xx', 'test@test.com');
-  //     INSERT INTO "user" (id, email) VALUES ('axf1123cfg', 'danielly.depaula@hpi.de');
-  //   `;
-
   await sql`
-      INSERT INTO case_t (id, main_post, replies) VALUES (
-        '1', 
-        ${JSON.stringify({
-          author: "TechEnthusiast",
-          avatar: "https://i.pravatar.cc/40",
-          content: "What is the best way to learn React in 2023?",
-          timestamp: "2 hours ago",
-        })}::jsonb,
-        ${JSON.stringify([
-          {
-            author: "CodeMaster",
-            avatar: "https://i.pravatar.cc/40",
-            content:
-              "I would recommend starting with the official React documentation and then building small projects.",
-            timestamp: "1 hour ago",
-          },
-          {
-            author: "WebDevNewbie",
-            avatar: "https://i.pravatar.cc/40",
-            content: "I found online courses really helpful when I was learning React.",
-            timestamp: "45 minutes ago",
-          },
-        ])}::jsonb
-      );
-    `;
+    CREATE TABLE IF NOT EXISTS branch_counts (
+      branch TEXT PRIMARY KEY,
+      count INTEGER NOT NULL DEFAULT 0
+    );
+  `;
+
+  // seed initial counts
+  await sql`
+    INSERT INTO branch_counts (branch, count)
+    VALUES
+      ('branch-a', 0),
+      ('branch-b', 0)
+    ON CONFLICT DO NOTHING;
+  `;
 
   console.log("Database setup complete.");
+  console.log("Importing cases...");
+  await importAndInsertCases();
+  console.log("Cases import complete.");
 }

@@ -40,7 +40,8 @@ export type PostQs = {
 
 export type Submission = {
   id: string;
-  nda: boolean;
+  dataConsent?: boolean;
+  debriefingConsent?: boolean;
   branch: "branch-a" | "branch-b";
   preQs?: PreQs;
   postQs?: PostQs;
