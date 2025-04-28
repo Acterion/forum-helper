@@ -1,5 +1,5 @@
 import DataConsent from "@/views/DataConsent";
 
-export default function DataConsentPage({ params }: { params: { submissionId: string } }) {
-  return <DataConsent submissionId={params.submissionId} />;
+export default async function DataConsentPage({ params }: { params: Promise<{ submissionId: string }> }) {
+  return <DataConsent submissionId={(await params).submissionId} />;
 }
