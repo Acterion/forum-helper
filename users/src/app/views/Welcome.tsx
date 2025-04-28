@@ -28,11 +28,11 @@ export default function Welcome() {
       const newSubmissionId = v6();
       await createSubmission({
         id: newSubmissionId,
-        prolific_pid: prolificPid ?? "",
-        study_id: studyId ?? "",
-        session_id: sessionId ?? "",
+        prolificPid: prolificPid ?? "",
+        studyId: studyId ?? "",
+        sessionId: sessionId ?? "",
       });
-      router.push(`/study/${newSubmissionId}/consent`);
+      router.push(`/study/${newSubmissionId}/dataConsent`);
     } catch (err) {
       console.error("Start error", err);
       setError("An error occurred. Please try again later.");

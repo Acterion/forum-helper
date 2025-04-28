@@ -45,9 +45,9 @@ export type Submission = {
   branch: "branch-a" | "branch-b";
   preQs?: PreQs;
   postQs?: PostQs;
-  prolific_pid?: string;
-  study_id?: string;
-  session_id?: string;
+  prolificPid?: string;
+  studyId?: string;
+  sessionId?: string;
 };
 
 export type CaseResponse = {

@@ -2,7 +2,7 @@ import PreSurvey from "@/views/PreSurvey";
 import { getSubmission } from "@/actions/submissions";
 import ThreadView from "@/views/CaseView/CaseView";
 import PostSurvey from "@/views/PostSurvey";
-import Complete from "@/components/Complete";
+import Complete from "@/views/Complete";
 
 export default async function StudyPage({ params }: { params: Promise<{ submissionId: string; studyStep: string }> }) {
   const { submissionId, studyStep } = await params;

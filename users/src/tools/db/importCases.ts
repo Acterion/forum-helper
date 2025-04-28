@@ -2,7 +2,9 @@ import fs from "fs";
 import csv from "csv-parser";
 import { v4 as uuidv4 } from "uuid";
 import { Case, Post } from "@/types";
-import { sql } from "@/lib/db";
+import { db } from "@/db";
+import { case_t } from "@/schema";
+import { sql } from "drizzle-orm";
 
 const generateFakeAuthor = (): string => {
   const authors = ["Alice", "Bob", "Charlie", "Dave", "Eve"];
@@ -63,16 +65,17 @@ const importCasesFromCSV = (filePath: string): Promise<Case[]> => {
 
 const insertCases = async (cases: Case[]) => {
   for (const newCase of cases) {
-    await sql`
-      INSERT INTO case_t (id, main_post, replies)
-      VALUES (${newCase.id}, ${JSON.stringify(newCase.mainPost)}::jsonb, ${JSON.stringify(newCase.replies)}::jsonb);
-    `;
+    await db.insert(case_t).values({
+      id: newCase.id,
+      mainPost: newCase.mainPost,
+      replies: newCase.replies,
+    });
   }
 };
 
 export async function importAndInsertCases() {
   const filePath = "./src/tools/db/Seeker Posts + Answers - Sheet1.csv";
   const cases = await importCasesFromCSV(filePath);
-  await sql`DELETE FROM case_t;`;
+  await db.delete(case_t).where(sql`${case_t.id} IS NOT NULL`);
   await insertCases(cases);
 }

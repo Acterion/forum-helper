@@ -1,35 +1,41 @@
 "use server";
 
-import { sql } from "@/lib/db";
+import { db } from "@/db";
 import { Case, CaseResponse, Post } from "@/types";
+import { case_t, case_response } from "@/schema";
+import { eq } from "drizzle-orm";
 
 export async function getCases() {
-  const response = await sql`SELECT id FROM case_t;`;
-  return response.rows.map((row) => row.id);
+  const rows = await db.select({ id: case_t.id }).from(case_t);
+  return rows.map((r) => r.id);
 }
 
 export async function getCase(caseId: string) {
   if (!caseId) return null;
-  const response = await sql`SELECT * FROM case_t WHERE id = ${caseId};`;
-  const caseData = response.rows[0] as { id: string; main_post: Post; replies: Post[] };
-
-  return {
-    id: caseData.id,
-    mainPost: caseData.main_post,
-    replies: caseData.replies,
-  } as Case;
+  const rows = await db
+    .select({ id: case_t.id, mainPost: case_t.mainPost, replies: case_t.replies })
+    .from(case_t)
+    .where(eq(case_t.id, caseId))
+    .limit(1);
+  if (rows.length === 0) return null;
+  const c = rows[0];
+  return { id: c.id, mainPost: c.mainPost, replies: c.replies } as Case;
 }
 
 export async function submitCase(caseRes: CaseResponse) {
   console.log(caseRes);
-  await sql`
-        INSERT INTO case_response (
-            id, case_id, submission_id, pre_confidence, ai_suggestion, reply_text, post_confidence, post_stress, action_sequence
-        ) VALUES (
-            ${caseRes.id}, ${caseRes.caseId}, ${caseRes.submissionId}, ${caseRes.preConfidence},
-            ${caseRes.aiSuggestion}, ${caseRes.replyText}, ${caseRes.postConfidence}, ${
-    caseRes.postStress
-  }, ${JSON.stringify(caseRes.actionSequence)}::jsonb
-        );
-    `;
+  await db
+    .insert(case_response)
+    .values({
+      ...caseRes,
+    })
+    .execute();
+}
+
+export async function deleteCaseResponse(caseId: string) {
+  await db.delete(case_response).where(eq(case_response.caseId, caseId)).execute();
+}
+
+export async function deleteCaseResponses(submissionId: string) {
+  await db.delete(case_response).where(eq(case_response.submissionId, submissionId)).execute();
 }

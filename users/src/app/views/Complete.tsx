@@ -1,14 +1,15 @@
 "use client";
 
-import { useEffect } from "react";
-import Loading from "./Loading";
+import { useEffect, useState } from "react";
+import Loading from "../components/Loading";
 
 export default function Complete() {
+  const [prolificCompletionUrl, setProlificCompletionUrl] = useState<string>(
+    "https://app.prolific.com/submissions/complete?cc=C16GBRWH"
+  );
   useEffect(() => {
-    const prolificCompletionUrl =
-      process.env.PROLIFIC_COMPLETION_URL || "https://app.prolific.com/submissions/complete?cc=C16GBRWH"; // Fallback URL
+    process.env.PROLIFIC_COMPLETION_URL ? setProlificCompletionUrl(process.env.PROLIFIC_COMPLETION_URL) : "";
 
-    console.log(prolificCompletionUrl);
     if (prolificCompletionUrl) {
       window.location.href = prolificCompletionUrl;
     } else {
@@ -21,7 +22,7 @@ export default function Complete() {
       <h2 className="text-2xl font-bold text-center mb-4">Redirecting back to Prolific...</h2>
       <p className="text-center text-gray-500">
         Please wait. If you are not redirected automatically, please click{" "}
-        <a href="https://app.prolific.com/submissions/complete?cc=C16GBRWH" className="text-blue-500 hover:underline">
+        <a href={prolificCompletionUrl} className="text-blue-500 hover:underline">
           here
         </a>{" "}
         to return to Prolific or ensure the completion URL is correctly configured.

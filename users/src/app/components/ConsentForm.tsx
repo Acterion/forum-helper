@@ -80,7 +80,8 @@ export default function ConsentForm({
           <AlertDialogHeader>
             <AlertDialogTitle>Warning</AlertDialogTitle>
             <AlertDialogDescription>
-              The study will end and the data will be deleted if you don't agree with this
+              The study will end and the data will be deleted if you don't agree with this consent form. Are you sure
+              you want to proceed?
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

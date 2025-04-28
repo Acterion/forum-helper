@@ -1,7 +1,8 @@
 "use server";
 
-import { sql } from "@/lib/db";
-import { importAndInsertCases } from "../../tools/db/importCases";
+import { db } from "@/db";
+import { sql } from "drizzle-orm";
+import { importAndInsertCases } from "@/tools/db/importCases";
 
 async function checkSchema() {
   // Define the expected tables and columns
@@ -35,11 +36,11 @@ async function checkSchema() {
   // Check for each table and its columns in the database
   for (const [table, columns] of Object.entries(expectedSchema)) {
     // Check if the table exists
-    const tableCheck = await sql`
+    const tableCheck = await db.execute(sql`
       SELECT 1 
       FROM information_schema.tables 
       WHERE table_name = ${table}
-    `;
+    `);
 
     if (tableCheck.rows.length === 0) {
       console.log(`${table} not found`);
@@ -48,11 +49,11 @@ async function checkSchema() {
 
     // Check if each column exists in the table
     for (const column of columns) {
-      const columnCheck = await sql`
+      const columnCheck = await db.execute(sql`
         SELECT 1 
         FROM information_schema.columns 
         WHERE table_name = ${table} AND column_name = ${column}
-      `;
+      `);
       if (columnCheck.rows.length === 0) {
         console.log(`${column} in ${table} not found`);
         return false;
@@ -79,7 +80,7 @@ export default async function initDB() {
   // // Drop tables individually
   // await sql`DROP TABLE IF EXISTS "user";`;
   // await sql`DROP TABLE IF EXISTS case_t;`;
-  await sql`DROP TABLE IF EXISTS submission CASCADE;`;
+  // await sql`DROP TABLE IF EXISTS submission CASCADE;`;
   // await sql`DROP TABLE IF EXISTS case_response;`;
 
   console.log("Creating tables...");

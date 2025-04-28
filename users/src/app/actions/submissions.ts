@@ -1,11 +1,12 @@
 "use server";
 
-import { sql } from "@vercel/postgres";
-import { Submission } from "@/types";
+import { db } from "@/db";
+import { PostQs, PreQs, Submission } from "@/types";
+import { submission, branch_counts } from "@/schema";
+import { eq, sql } from "drizzle-orm";
 
 async function choseBranch() {
-  const countsResult = await sql`SELECT branch, count FROM branch_counts WHERE branch IN ('branch-a','branch-b');`;
-  const counts = countsResult.rows as { branch: string; count: number }[];
+  const counts = await db.select({ branch: branch_counts.branch, count: branch_counts.count }).from(branch_counts);
   const countA = counts.find((r) => r.branch === "branch-a")?.count ?? 0;
   const countB = counts.find((r) => r.branch === "branch-b")?.count ?? 0;
   let chosen: string;
@@ -15,120 +16,68 @@ async function choseBranch() {
   return chosen;
 }
 
-export async function createSubmission(submission: Omit<Submission, "branch" | "dataConsent" | "debriefingConsent">) {
+export async function createSubmission(sub: Omit<Submission, "branch" | "dataConsent" | "debriefingConsent">) {
   const branch = await choseBranch();
-  await sql`UPDATE branch_counts SET count = count + 1 WHERE branch = ${branch};`;
-  // insert submission with assigned branch
-  await sql`
-    INSERT INTO submission (id, prolific_pid, study_id, session_id, branch) 
-    VALUES (
-      ${submission.id}, 
-      ${submission.prolific_pid || null}, 
-      ${submission.study_id || null}, 
-      ${submission.session_id || null},
-      ${branch}
-    );
-  `;
-}
+  await db
+    .update(branch_counts)
+    .set({ count: sql`${branch_counts.count} + 1` })
+    .where(eq(branch_counts.branch, branch))
+    .execute();
 
-export async function getSubmission(submissionId: string) {
-  if (!submissionId) return null;
-  const response = await sql`SELECT * FROM submission WHERE id = ${submissionId};`;
-  const submissionData = response.rows[0] as {
-    id: string;
-    dataConsent: boolean;
-    debriefingConsent: boolean;
-    branch: string;
-    pre_qs: object;
-    post_qs: object;
-    prolific_pid: string | null;
-    study_id: string | null;
-    session_id: string | null;
-  };
-
-  return {
-    id: submissionData.id,
-    dataConsent: submissionData.dataConsent,
-    debriefingConsent: submissionData.debriefingConsent,
-    branch: submissionData.branch,
-    prolific_pid: submissionData.prolific_pid ?? undefined,
-    study_id: submissionData.study_id ?? undefined,
-    session_id: submissionData.session_id ?? undefined,
-    preQs: submissionData.pre_qs,
-    postQs: submissionData.post_qs,
-  } as Submission;
-}
-
-// Define a type that requires 'id' but makes other fields partial
-type UpdatableSubmission = Partial<Omit<Submission, "id">> & Pick<Submission, "id">;
-
-export async function updateSubmission(submission: UpdatableSubmission) {
-  const { id, ...updates } = submission; // Destructure id and the rest of the updates
-
-  if (!id) {
-    // This check is technically redundant due to the type, but good for runtime safety
-    throw new Error("Submission ID is required for update.");
-  }
-
-  // Filter out undefined values, as they indicate the field should not be updated
-  const updateEntries = Object.entries(updates).filter(([, value]) => value !== undefined);
-
-  if (updateEntries.length === 0) {
-    console.log("No fields provided for update.");
-    return; // Nothing to update
-  }
-
-  // Map TypeScript keys to database column names and format values
-  const setClauses = updateEntries
-    .map(([key, value]) => {
-      switch (key) {
-        case "preQs":
-          // Ensure value is not null before stringifying, handle potential null if needed
-          return sql`pre_qs = ${value === null ? null : JSON.stringify(value)}::jsonb`;
-        case "postQs":
-          return sql`post_qs = ${value === null ? null : JSON.stringify(value)}::jsonb`;
-        case "prolific_pid":
-          // Assert value is string or null/undefined
-          return sql`prolific_pid = ${(value as string) ?? null}`;
-        case "study_id":
-          return sql`study_id = ${(value as string) ?? null}`;
-        case "session_id":
-          return sql`session_id = ${(value as string) ?? null}`;
-        case "dataConsent":
-          // Assert value is boolean
-          return sql`"dataConsent" = ${value as boolean}`; // Ensure column name is quoted if needed
-        case "debriefingConsent":
-          // Assert value is boolean
-          return sql`"debriefingConsent" = ${value as boolean}`; // Ensure column name is quoted if needed
-        case "branch":
-          // Assert value is string
-          return sql`branch = ${value as string}`;
-        default:
-          // Log a warning for keys present in the input but not handled
-          console.warn(`Unsupported field for update: ${key}`);
-          return null; // This clause will be filtered out
-      }
+  await db
+    .insert(submission)
+    .values({
+      id: sub.id,
+      prolificPid: sub.prolificPid ?? null,
+      studyId: sub.studyId ?? null,
+      sessionId: sub.sessionId ?? null,
+      branch: branch,
     })
-    .filter((clause): clause is NonNullable<typeof clause> => clause !== null); // Filter out nulls resulting from unsupported keys
+    .execute();
+}
 
-  // Check if there are any valid clauses to apply
-  if (setClauses.length === 0) {
-    console.log("No valid fields to update after mapping.");
+export async function getSubmission(submissionId: string): Promise<Submission | null> {
+  if (!submissionId) return null;
+  const rows = await db.select().from(submission).where(eq(submission.id, submissionId)).limit(1);
+  if (rows.length === 0) return null;
+  const s = rows[0];
+
+  if (s.branch === null || (s.branch !== "branch-a" && s.branch !== "branch-b")) {
+    console.error(`Invalid or null branch value "${s.branch}" for submission ID:`, submissionId);
+    return null;
+  }
+  return {
+    id: s.id,
+    dataConsent: s.dataConsent ?? undefined,
+    debriefingConsent: s.debriefingConsent ?? undefined,
+    branch: s.branch,
+    prolificPid: s.prolificPid ?? undefined,
+    studyId: s.studyId ?? undefined,
+    sessionId: s.sessionId ?? undefined,
+    preQs: (s.preQs as PreQs) ?? undefined,
+    postQs: (s.postQs as PostQs) ?? undefined,
+  };
+}
+
+type UpdatableSubmission = Partial<Omit<Submission, "id">> & {
+  id: string;
+};
+
+export async function updateSubmission(input: UpdatableSubmission) {
+  const { id, ...rest } = input;
+
+  //Generate update object
+  const data = Object.entries(rest).reduce((acc, [key, value]) => {
+    if (value !== undefined) {
+      acc[key as keyof typeof acc] = value as any;
+    }
+    return acc;
+  }, {} as Partial<typeof submission.$inferInsert>);
+
+  if (Object.keys(data).length === 0) {
+    console.log("No fields provided to update.");
     return;
   }
 
-  //call table update for each clause
-  setClauses.forEach((clause) => {
-    sql`UPDATE submission SET ${clause} WHERE id = ${id};`;
-  });
-
-  // Create one SQL statement with all the set clauses
-  const setClause = setClauses.join(", ");
-
-  // Execute the dynamic UPDATE statement
-  await sql`
-    UPDATE submission
-    SET ${setClause}
-    WHERE id = ${id};
-  `;
+  await db.update(submission).set(data).where(eq(submission.id, id)).execute();
 }
