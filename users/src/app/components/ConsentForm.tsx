@@ -71,7 +71,7 @@ export default function ConsentForm({
           Agree
         </Button>
         <Button variant="outline" onClick={handleDisagree} className="px-8">
-          Don't Agree
+          Don&apos;t Agree
         </Button>
       </div>
 
@@ -80,8 +80,8 @@ export default function ConsentForm({
           <AlertDialogHeader>
             <AlertDialogTitle>Warning</AlertDialogTitle>
             <AlertDialogDescription>
-              The study will end and the data will be deleted if you don't agree with this consent form. Are you sure
-              you want to proceed?
+              The study will end and the data will be deleted if you don&apos;t agree with this consent form. Are you
+              sure you want to proceed?
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

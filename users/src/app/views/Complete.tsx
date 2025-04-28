@@ -8,7 +8,7 @@ export default function Complete() {
     "https://app.prolific.com/submissions/complete?cc=C16GBRWH"
   );
   useEffect(() => {
-    process.env.PROLIFIC_COMPLETION_URL ? setProlificCompletionUrl(process.env.PROLIFIC_COMPLETION_URL) : "";
+    if (process.env.PROLIFIC_COMPLETION_URL) setProlificCompletionUrl(process.env.PROLIFIC_COMPLETION_URL);
 
     if (prolificCompletionUrl) {
       window.location.href = prolificCompletionUrl;

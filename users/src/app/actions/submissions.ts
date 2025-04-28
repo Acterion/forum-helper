@@ -69,6 +69,7 @@ export async function updateSubmission(input: UpdatableSubmission) {
   //Generate update object
   const data = Object.entries(rest).reduce((acc, [key, value]) => {
     if (value !== undefined) {
+      // @ts-ignore no simple way to do this
       acc[key as keyof typeof acc] = value as any;
     }
     return acc;
