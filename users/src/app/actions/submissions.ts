@@ -69,7 +69,7 @@ export async function updateSubmission(input: UpdatableSubmission) {
   //Generate update object
   const data = Object.entries(rest).reduce((acc, [key, value]) => {
     if (value !== undefined) {
-      // @ts-ignore no simple way to do this
+      // eslint-disable-next-line  @typescript-eslint/no-explicit-any
       acc[key as keyof typeof acc] = value as any;
     }
     return acc;
