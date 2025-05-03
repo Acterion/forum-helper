@@ -1,0 +1,1 @@
+ALTER TABLE "submission" ALTER COLUMN "sequence" SET DEFAULT -1;

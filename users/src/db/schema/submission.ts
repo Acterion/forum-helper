@@ -5,7 +5,7 @@ export const submission = pgTable("submission", {
   dataConsent: boolean("data_consent"),
   debriefingConsent: boolean("debriefing_consent"),
   branch: text("branch"),
-  sequence: integer("sequence").notNull(),
+  sequence: integer("sequence").notNull().default(-1),
   preQs: jsonb("pre_qs"),
   postQs: jsonb("post_qs"),
   prolificPid: text("prolific_pid"),
