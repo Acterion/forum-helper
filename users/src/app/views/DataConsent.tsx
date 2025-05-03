@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { getSubmission, updateSubmission } from "@/actions/submissions";
+import { assignSubmissionBranch, getSubmission, updateSubmission } from "@/actions/submissions";
 import ConsentForm from "@/components/ConsentForm";
 import Loading from "@/components/Loading";
 import type { Submission } from "@/types";
@@ -53,6 +53,7 @@ export default function DataConsent({ submissionId }: DataConsentProps) {
       id: submissionId,
       dataConsent: true,
     });
+    await assignSubmissionBranch(submissionId);
     router.push(`/study/${submissionId}/1`);
   };
 

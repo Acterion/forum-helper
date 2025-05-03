@@ -57,6 +57,13 @@
       "when": 1746304110548,
       "tag": "0007_minor_lifeguard",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1746310460236,
+      "tag": "0008_quick_mantis",
+      "breakpoints": true
     }
   ]
 }

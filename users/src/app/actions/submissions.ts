@@ -31,17 +31,6 @@ async function choseSequence(branch: "branch-a" | "branch-b") {
 export async function createSubmission(
   sub: Omit<Submission, "branch" | "dataConsent" | "debriefingConsent" | "sequence">
 ) {
-  const branch = await choseBranch();
-  const sequence = await choseSequence(branch);
-  await db
-    .update(branch_counts)
-    .set({
-      count: sql`${branch_counts.count} + 1`,
-      sequenceCount: sql`${branch_counts.sequenceCount}[${sequence}] + 1`,
-    })
-    .where(eq(branch_counts.branch, branch))
-    .execute();
-
   await db
     .insert(submission)
     .values({
@@ -49,8 +38,6 @@ export async function createSubmission(
       prolificPid: sub.prolificPid ?? null,
       studyId: sub.studyId ?? null,
       sessionId: sub.sessionId ?? null,
-      branch: branch,
-      sequence: sequence,
     })
     .execute();
 }
@@ -61,7 +48,7 @@ export async function getSubmission(submissionId: string): Promise<Submission | 
   if (rows.length === 0) return null;
   const s = rows[0];
 
-  if (s.branch === null || (s.branch !== "branch-a" && s.branch !== "branch-b")) {
+  if (s.branch === null || (s.branch !== "branch-a" && s.branch !== "branch-b" && s.branch !== "not-set")) {
     console.error(`Invalid or null branch value "${s.branch}" for submission ID:`, submissionId);
     return null;
   }
@@ -101,4 +88,35 @@ export async function updateSubmission(input: UpdatableSubmission) {
   }
 
   await db.update(submission).set(data).where(eq(submission.id, id)).execute();
+}
+
+export async function assignSubmissionBranch(submissionId: string) {
+  const branch = await choseBranch();
+  const sequence = await choseSequence(branch);
+
+  const currentSequenceCount = await db
+    .select({ branch: branch_counts.branch, count: branch_counts.sequenceCount })
+    .from(branch_counts)
+    .where(eq(branch_counts.branch, branch));
+
+  const updatedSequenceCount = [...currentSequenceCount[0].count];
+  updatedSequenceCount[sequence] += 1;
+
+  await db
+    .update(branch_counts)
+    .set({
+      count: sql`${branch_counts.count} + 1`,
+      sequenceCount: updatedSequenceCount,
+    })
+    .where(eq(branch_counts.branch, branch))
+    .execute();
+
+  await db
+    .update(submission)
+    .set({
+      branch: branch,
+      sequence: sequence,
+    })
+    .where(eq(submission.id, submissionId))
+    .execute();
 }

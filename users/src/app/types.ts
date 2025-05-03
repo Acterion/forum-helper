@@ -48,7 +48,7 @@ export type Submission = {
   id: string;
   dataConsent?: boolean;
   debriefingConsent?: boolean;
-  branch: "branch-a" | "branch-b";
+  branch: "branch-a" | "branch-b" | "not-set";
   sequence: number;
   preQs?: PreQs;
   postQs?: PostQs;

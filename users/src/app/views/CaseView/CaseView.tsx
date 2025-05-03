@@ -10,15 +10,17 @@ import LoadingDots from "@/components/LoadingDots";
 import { useFormState } from "./useForm";
 import { useCaseState } from "./useCase";
 import { useRouter } from "next/navigation";
+import { Submission } from "@/types";
 
 interface ThreadViewProps {
   submissionId: string;
-  branch: "branch-a" | "branch-b";
+  branch: Submission["branch"];
+  sequence: number[];
 }
 
-export default function ThreadView({ submissionId, branch }: ThreadViewProps) {
+export default function ThreadView({ submissionId, branch, sequence }: ThreadViewProps) {
   const { casesList, caseNumber, setCaseNumber, currentCaseId, setCurrentCaseId, currentCase, progress } =
-    useCaseState();
+    useCaseState(sequence);
 
   const { formState, updateFormState, resetForm, handleNextStep } = useFormState(currentCaseId, submissionId);
   const [isAiLoading, setIsAiLoading] = useState(false);
@@ -79,7 +81,6 @@ export default function ThreadView({ submissionId, branch }: ThreadViewProps) {
 
     if (caseNumber < casesList.length - 1) {
       setCaseNumber(caseNumber + 1);
-      setCurrentCaseId(casesList[caseNumber + 1]);
     } else {
       router.push(`/study/${submissionId}/3`);
     }

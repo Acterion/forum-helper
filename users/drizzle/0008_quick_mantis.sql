@@ -1,0 +1,1 @@
+ALTER TABLE "submission" ALTER COLUMN "branch" SET DEFAULT 'not-set';

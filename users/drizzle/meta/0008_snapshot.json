@@ -1,0 +1,250 @@
+{
+  "id": "f91e1d2b-6c9f-416a-b8fb-ec293730bb0c",
+  "prevId": "d97e657a-0d5b-4cd9-a3b0-aa92ee77c448",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "public.branch_counts": {
+      "name": "branch_counts",
+      "schema": "",
+      "columns": {
+        "branch": {
+          "name": "branch",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "count": {
+          "name": "count",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "sequence_count": {
+          "name": "sequence_count",
+          "type": "integer[]",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'{0,0,0,0,0,0,0,0,0,0}'"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.case_response": {
+      "name": "case_response",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "submission_id": {
+          "name": "submission_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "case_id": {
+          "name": "case_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "pre_confidence": {
+          "name": "pre_confidence",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "ai_suggestion": {
+          "name": "ai_suggestion",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "reply_text": {
+          "name": "reply_text",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "post_confidence": {
+          "name": "post_confidence",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "post_stress": {
+          "name": "post_stress",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "action_sequence": {
+          "name": "action_sequence",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.case_t": {
+      "name": "case_t",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "main_post": {
+          "name": "main_post",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "replies": {
+          "name": "replies",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.submission": {
+      "name": "submission",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "data_consent": {
+          "name": "data_consent",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "debriefing_consent": {
+          "name": "debriefing_consent",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "branch": {
+          "name": "branch",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'not-set'"
+        },
+        "sequence": {
+          "name": "sequence",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": -1
+        },
+        "pre_qs": {
+          "name": "pre_qs",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "post_qs": {
+          "name": "post_qs",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "prolific_pid": {
+          "name": "prolific_pid",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "study_id": {
+          "name": "study_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "session_id": {
+          "name": "session_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.user": {
+      "name": "user",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "email": {
+          "name": "email",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    }
+  },
+  "enums": {},
+  "schemas": {},
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "views": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}

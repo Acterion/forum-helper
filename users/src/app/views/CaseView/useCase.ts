@@ -2,7 +2,7 @@ import { getCase, getCases } from "@/actions/cases";
 import { Case } from "@/types";
 import { useEffect, useState } from "react";
 
-export const useCaseState = () => {
+export const useCaseState = (sequence: number[]) => {
   const [casesList, setCasesList] = useState<string[]>([]);
   const [caseNumber, setCaseNumber] = useState(0);
   const [currentCaseId, setCurrentCaseId] = useState("");
@@ -19,11 +19,16 @@ export const useCaseState = () => {
 
   useEffect(() => {
     const fetchCase = async () => {
-      console.log(casesList[caseNumber]);
-      setCurrentCase(await getCase(casesList[caseNumber]));
+      setCurrentCase(await getCase(casesList[sequence[caseNumber]]));
     };
     if (casesList.length) fetchCase();
   }, [caseNumber, casesList]);
+
+  useEffect(() => {
+    if (casesList.length) {
+      setCurrentCaseId(currentCase?.id || "");
+    }
+  }, [currentCase]);
 
   useEffect(() => {
     setProgress(((caseNumber + 1) / casesList.length) * 100);
