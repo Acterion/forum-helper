@@ -8,7 +8,7 @@ export default function ForumPost({ post, isMainPost = false }: { post: Post; is
     <div className={`flex space-x-4 ${isMainPost ? "mb-6" : "mb-4"}`}>
       <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
         {post.avatar ? (
-          <Image src={post.avatar} alt={post.author} className="w-full h-full rounded-full" />
+          <Image src={post.avatar} alt={post.author} width={40} height={40} className="w-full h-full rounded-full" />
         ) : (
           <span className="text-sm font-bold">{post.author.slice(0, 2).toUpperCase()}</span>
         )}

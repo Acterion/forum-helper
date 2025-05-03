@@ -9,18 +9,36 @@ async function choseBranch() {
   const counts = await db.select({ branch: branch_counts.branch, count: branch_counts.count }).from(branch_counts);
   const countA = counts.find((r) => r.branch === "branch-a")?.count ?? 0;
   const countB = counts.find((r) => r.branch === "branch-b")?.count ?? 0;
-  let chosen: string;
+  let chosen: "branch-a" | "branch-b";
   if (countA < countB) chosen = "branch-a";
   else if (countB < countA) chosen = "branch-b";
   else chosen = Math.random() < 0.5 ? "branch-a" : "branch-b";
   return chosen;
 }
 
-export async function createSubmission(sub: Omit<Submission, "branch" | "dataConsent" | "debriefingConsent">) {
+async function choseSequence(branch: "branch-a" | "branch-b") {
+  const sequenceCounts = await db
+    .select({ branch: branch_counts.branch, count: branch_counts.sequenceCount })
+    .from(branch_counts)
+    .where(eq(branch_counts.branch, branch));
+
+  //find the index of the sequence.count with the lowest count
+  const minIndex = sequenceCounts[0].count.findIndex((c) => c === Math.min(...sequenceCounts[0].count));
+
+  return minIndex;
+}
+
+export async function createSubmission(
+  sub: Omit<Submission, "branch" | "dataConsent" | "debriefingConsent" | "sequence">
+) {
   const branch = await choseBranch();
+  const sequence = await choseSequence(branch);
   await db
     .update(branch_counts)
-    .set({ count: sql`${branch_counts.count} + 1` })
+    .set({
+      count: sql`${branch_counts.count} + 1`,
+      sequenceCount: sql`${branch_counts.sequenceCount}[${sequence}] + 1`,
+    })
     .where(eq(branch_counts.branch, branch))
     .execute();
 
@@ -32,6 +50,7 @@ export async function createSubmission(sub: Omit<Submission, "branch" | "dataCon
       studyId: sub.studyId ?? null,
       sessionId: sub.sessionId ?? null,
       branch: branch,
+      sequence: sequence,
     })
     .execute();
 }
@@ -51,6 +70,7 @@ export async function getSubmission(submissionId: string): Promise<Submission | 
     dataConsent: s.dataConsent ?? undefined,
     debriefingConsent: s.debriefingConsent ?? undefined,
     branch: s.branch,
+    sequence: s.sequence,
     prolificPid: s.prolificPid ?? undefined,
     studyId: s.studyId ?? undefined,
     sessionId: s.sessionId ?? undefined,

@@ -67,6 +67,7 @@ async function checkSchema() {
 
 export default async function initDB() {
   console.log("Checking database schema...");
+  await importAndInsertCases();
 
   // Check if tables already exist with the expected schema
   const schemaExists = await checkSchema();

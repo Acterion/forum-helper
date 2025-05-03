@@ -17,13 +17,15 @@ export type Case = {
 };
 
 export type PreQs = {
-  age: number;
-  gender: "male" | "female" | "other" | "";
-  experience: "none" | "<1 year" | ">=1 year" | "";
+  frequency: "" | "Always" | "Often" | "Sometimes" | "Occasionally" | "Never";
   selfEfficacy1: number | null;
   selfEfficacy2: number | null;
   selfEfficacy3: number | null;
   selfEfficacy4: number | null;
+  selfEfficacy5: number | null;
+  selfEfficacy6: number | null;
+  selfEfficacy7: number | null;
+  selfEfficacy8: number | null;
 };
 
 export type PostQs = {
@@ -32,10 +34,14 @@ export type PostQs = {
   actionability: number | null;
   stress: number | null;
   intentionToAdopt: number | null;
+  wantAIHelp: number | null;
   selfEfficacy1: number | null;
   selfEfficacy2: number | null;
   selfEfficacy3: number | null;
   selfEfficacy4: number | null;
+  selfEfficacy5: number | null;
+  selfEfficacy6: number | null;
+  selfEfficacy7: number | null;
 };
 
 export type Submission = {
@@ -43,6 +49,7 @@ export type Submission = {
   dataConsent?: boolean;
   debriefingConsent?: boolean;
   branch: "branch-a" | "branch-b";
+  sequence: number;
   preQs?: PreQs;
   postQs?: PostQs;
   prolificPid?: string;

@@ -6,11 +6,11 @@ export const makeNewResponse = (caseId: string, submissionId: string): CaseRespo
   id: uuid(),
   caseId,
   submissionId,
-  preConfidence: 1,
+  preConfidence: 0,
   aiSuggestion: "",
   replyText: "",
-  postConfidence: 1,
-  postStress: 1,
+  postConfidence: 0,
+  postStress: 0,
   actionSequence: [],
 });
 

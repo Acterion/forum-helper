@@ -19,10 +19,14 @@ export default function PostSurvey({ submissionId }: PostSurveyProps) {
     actionability: null,
     stress: null,
     intentionToAdopt: null,
+    wantAIHelp: null,
     selfEfficacy1: null,
     selfEfficacy2: null,
     selfEfficacy3: null,
     selfEfficacy4: null,
+    selfEfficacy5: null,
+    selfEfficacy6: null,
+    selfEfficacy7: null,
   });
 
   const [submission, setSubmission] = useState<Submission | null>(null);
@@ -31,6 +35,53 @@ export default function PostSurvey({ submissionId }: PostSurveyProps) {
   }, [submissionId]);
 
   if (!submission) return <Loading />;
+
+  const isBranchA = submission.branch === "branch-a";
+  const userExperienceQuestions = isBranchA
+    ? [
+        { key: "helpfulness", label: "Feedback shown to me was helpful in improving my responses." },
+        { key: "empathy", label: "Feedback shown to me was helpful in making my responses more empathic." },
+        { key: "actionability", label: "Feedback shown to me was easy to incorporate into the final response." },
+        { key: "stress", label: "It was challenging or stressful to write responses to posts." },
+        {
+          key: "intentionToAdopt",
+          label: "I would like to see this type of feedback system deployed on online peer-support platforms.",
+        },
+      ]
+    : [
+        { key: "wantAIHelp", label: "I would like to have had help from AI to improve my responses." },
+        { key: "stress", label: "It was challenging or stressful to write responses to posts." },
+      ];
+  const selfEfficacyQuestions = [
+    {
+      key: "selfEfficacy1",
+      label: "After the study, I am confident I can write relevant responses to support seeking posts from users.",
+    },
+    {
+      key: "selfEfficacy2",
+      label: "After the study, I am confident I can write complete responses to support seeking posts from users.",
+    },
+    {
+      key: "selfEfficacy3",
+      label: "After the study, I am confident I can write helpful responses to support seeking posts from users.",
+    },
+    {
+      key: "selfEfficacy4",
+      label: "After the study, I am confident I can write accurate responses to support seeking posts from users.",
+    },
+    {
+      key: "selfEfficacy5",
+      label: "After the study, I am confident I can write appropriate responses to support seeking posts from users.",
+    },
+    {
+      key: "selfEfficacy6",
+      label: "After the study, I am confident I can write clear responses to support seeking posts from users.",
+    },
+    {
+      key: "selfEfficacy7",
+      label: "After the study, I am confident I can write empathetic responses to support seeking posts from users.",
+    },
+  ];
 
   const handleChange = (field: string, value: number | null) => {
     setAnswers((prev) => ({
@@ -52,57 +103,28 @@ export default function PostSurvey({ submissionId }: PostSurveyProps) {
       <form onSubmit={handleSubmit}>
         {/* Section 1: User Experience */}
         <div className="mb-12">
-          <h3 className="text-lg font-semibold mb-4">User Experience</h3>
-          <LikertScale
-            label="Feedback shown to me was helpful in improving my responses."
-            value={answers.helpfulness}
-            setValue={(value) => handleChange("helpfulness", value)}
-          />
-          <LikertScale
-            label="Feedback shown to me was helpful in making my responses more empathic."
-            value={answers.empathy}
-            setValue={(value) => handleChange("empathy", value)}
-          />
-          <LikertScale
-            label="Feedback shown to me was easy to incorporate into the final response."
-            value={answers.actionability}
-            setValue={(value) => handleChange("actionability", value)}
-          />
-          <LikertScale
-            label="It was challenging or stressful to write responses to posts."
-            value={answers.stress}
-            setValue={(value) => handleChange("stress", value)}
-          />
-          <LikertScale
-            label="I would like to see this type of feedback system deployed on online peer-support platforms."
-            value={answers.intentionToAdopt}
-            setValue={(value) => handleChange("intentionToAdopt", value)}
-          />
+          <h3 className="text-lg font-semibold mb-4">User Experience{!isBranchA && " after the study"}</h3>
+          {userExperienceQuestions.map((q) => (
+            <LikertScale
+              key={q.key}
+              label={q.label}
+              value={answers[q.key as keyof PostQs]}
+              setValue={(value) => handleChange(q.key, value)}
+            />
+          ))}
         </div>
 
         {/* Section 2: Self-efficacy */}
         <div className="mb-12">
-          <h3 className="text-lg font-semibold mb-4">Self-efficacy</h3>
-          <LikertScale
-            label="After this study, I am confident I can write helpful responses to support seeking posts from users."
-            value={answers.selfEfficacy1}
-            setValue={(value) => handleChange("selfEfficacy1", value)}
-          />
-          <LikertScale
-            label="After this study, I am confident I can write good responses to support seeking posts from users."
-            value={answers.selfEfficacy2}
-            setValue={(value) => handleChange("selfEfficacy2", value)}
-          />
-          <LikertScale
-            label="After this study, I am confident I can write empathetic responses to support seeking posts from users."
-            value={answers.selfEfficacy3}
-            setValue={(value) => handleChange("selfEfficacy3", value)}
-          />
-          <LikertScale
-            label="After this study, I feel that I need help in writing my responses."
-            value={answers.selfEfficacy4}
-            setValue={(value) => handleChange("selfEfficacy4", value)}
-          />
+          <h3 className="text-lg font-semibold mb-4">Self-efficacy after the study</h3>
+          {selfEfficacyQuestions.map((q) => (
+            <LikertScale
+              key={q.key}
+              label={q.label}
+              value={answers[q.key as keyof PostQs]}
+              setValue={(value) => handleChange(q.key, value)}
+            />
+          ))}
         </div>
 
         <button

@@ -43,6 +43,13 @@
       "when": 1745847750593,
       "tag": "0005_luxuriant_freak",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1746303110811,
+      "tag": "0006_living_chameleon",
+      "breakpoints": true
     }
   ]
 }

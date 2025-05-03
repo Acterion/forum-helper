@@ -7,7 +7,7 @@ import { case_t } from "@/schema";
 import { sql } from "drizzle-orm";
 
 const generateFakeAuthor = (): string => {
-  const authors = ["Alice", "Bob", "Charlie", "Dave", "Eve"];
+  const authors = ["Alice", "Theresa", "Charlie", "Angela", "Eve"];
   return authors[Math.floor(Math.random() * authors.length)];
 };
 
