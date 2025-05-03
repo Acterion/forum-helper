@@ -1,2 +1,2 @@
 ALTER TABLE "branch_counts" ADD COLUMN "sequence_count" integer[] DEFAULT '{0,0,0,0,0,0,0,0,0,0}' NOT NULL;--> statement-breakpoint
-ALTER TABLE "submission" ADD COLUMN "sequence" integer NOT NULL;
+ALTER TABLE "submission" ADD COLUMN "sequence" integer NOT NULL DEFAULT -1;
