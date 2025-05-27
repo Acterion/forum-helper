@@ -94,7 +94,7 @@ export default function PostSurvey({ submissionId }: PostSurveyProps) {
     e.preventDefault();
     e.currentTarget.checkValidity();
     updateSubmission({ ...submission, postQs: answers });
-    router.push(`/study/${submissionId}/complete`);
+    router.push(`/study/${submissionId}/debriefing`);
   };
 
   return (
