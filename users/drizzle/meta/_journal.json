@@ -64,6 +64,13 @@
       "when": 1746310460236,
       "tag": "0008_quick_mantis",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1748341374117,
+      "tag": "0009_loose_joseph",
+      "breakpoints": true
     }
   ]
 }

@@ -16,14 +16,14 @@ export default function PreSurvey({ submissionId }: PreSurveyProps) {
   // State object for all question answers
   const [answers, setAnswers] = useState<PreQs>({
     frequency: "",
-    selfEfficacy1: 0,
-    selfEfficacy2: 0,
-    selfEfficacy3: 0,
-    selfEfficacy4: 0,
-    selfEfficacy5: 0,
-    selfEfficacy6: 0,
-    selfEfficacy7: 0,
-    selfEfficacy8: 0,
+    selfEfficacy1: null,
+    selfEfficacy2: null,
+    selfEfficacy3: null,
+    selfEfficacy4: null,
+    selfEfficacy5: null,
+    selfEfficacy6: null,
+    selfEfficacy7: null,
+    selfEfficacy8: null,
   });
 
   const [submission, setSubmission] = useState<Submission | null>(null);

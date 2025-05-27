@@ -17,12 +17,12 @@ export const makeNewResponse = (caseId: string, submissionId: string): CaseRespo
 export const useFormState = (initialCaseId: string, submissionId: string) => {
   const [formState, setFormState] = useState({
     step: 1,
-    confidence: 1,
+    confidence: 0,
     replyText: "",
     aiSuggestion: "",
     comment: "",
-    postConfidence: 1,
-    postStress: 1,
+    postConfidence: 0,
+    postStress: 0,
     actionSequence: [] as { action: string; value: string }[],
     response: makeNewResponse(initialCaseId, submissionId),
   });
@@ -34,12 +34,12 @@ export const useFormState = (initialCaseId: string, submissionId: string) => {
   const resetForm = () => {
     setFormState({
       step: 1,
-      confidence: 1,
+      confidence: 0,
       replyText: "",
       aiSuggestion: "",
       comment: "",
-      postConfidence: 1,
-      postStress: 1,
+      postConfidence: 0,
+      postStress: 0,
       actionSequence: [],
       response: makeNewResponse(initialCaseId, submissionId),
     });
