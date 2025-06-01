@@ -6,6 +6,7 @@ import { PostQs, Submission } from "@/types";
 import { getSubmission, updateSubmission } from "@/actions/submissions";
 import { useRouter } from "next/navigation";
 import Loading from "@/components/Loading";
+import { agreementScale, confidenceScale, stressScale } from "@/static/scales";
 
 interface PostSurveyProps {
   submissionId: string;
@@ -39,47 +40,71 @@ export default function PostSurvey({ submissionId }: PostSurveyProps) {
   const isBranchA = submission.branch === "branch-a";
   const userExperienceQuestions = isBranchA
     ? [
-        { key: "helpfulness", label: "Feedback shown to me was helpful in improving my responses." },
-        { key: "empathy", label: "Feedback shown to me was helpful in making my responses more empathic." },
-        { key: "actionability", label: "Feedback shown to me was easy to incorporate into the final response." },
-        { key: "stress", label: "It was challenging or stressful to write responses to posts." },
+        {
+          key: "helpfulness",
+          label: "Feedback shown to me was helpful in improving my responses.",
+          scale: agreementScale,
+        },
+        {
+          key: "empathy",
+          label: "Feedback shown to me was helpful in making my responses more empathic.",
+          scale: agreementScale,
+        },
+        {
+          key: "actionability",
+          label: "Feedback shown to me was easy to incorporate into the final response.",
+          scale: agreementScale,
+        },
+        { key: "stress", label: "It was challenging or stressful to write responses to posts.", scale: stressScale },
         {
           key: "intentionToAdopt",
           label: "I would like to see this type of feedback system deployed on online peer-support platforms.",
+          scale: agreementScale,
         },
       ]
     : [
-        { key: "wantAIHelp", label: "I would like to have had help from AI to improve my responses." },
-        { key: "stress", label: "It was challenging or stressful to write responses to posts." },
+        {
+          key: "wantAIHelp",
+          label: "I would like to have had help from AI to improve my responses.",
+          scale: agreementScale,
+        },
+        { key: "stress", label: "It was challenging or stressful to write responses to posts.", scale: stressScale },
       ];
   const selfEfficacyQuestions = [
     {
       key: "selfEfficacy1",
       label: "After the study, I am confident I can write relevant responses to support seeking posts from users.",
+      scale: confidenceScale,
     },
     {
       key: "selfEfficacy2",
       label: "After the study, I am confident I can write complete responses to support seeking posts from users.",
+      scale: confidenceScale,
     },
     {
       key: "selfEfficacy3",
       label: "After the study, I am confident I can write helpful responses to support seeking posts from users.",
+      scale: confidenceScale,
     },
     {
       key: "selfEfficacy4",
       label: "After the study, I am confident I can write accurate responses to support seeking posts from users.",
+      scale: confidenceScale,
     },
     {
       key: "selfEfficacy5",
       label: "After the study, I am confident I can write appropriate responses to support seeking posts from users.",
+      scale: confidenceScale,
     },
     {
       key: "selfEfficacy6",
       label: "After the study, I am confident I can write clear responses to support seeking posts from users.",
+      scale: confidenceScale,
     },
     {
       key: "selfEfficacy7",
       label: "After the study, I am confident I can write empathetic responses to support seeking posts from users.",
+      scale: confidenceScale,
     },
   ];
 
@@ -92,7 +117,22 @@ export default function PostSurvey({ submissionId }: PostSurveyProps) {
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    e.currentTarget.checkValidity();
+
+    // Check form validity first
+    if (!e.currentTarget.checkValidity()) {
+      // Find the first invalid field and scroll to it
+      const firstInvalidField = e.currentTarget.querySelector(":invalid") as HTMLElement;
+      if (firstInvalidField) {
+        firstInvalidField.scrollIntoView({
+          behavior: "smooth",
+          block: "center",
+          inline: "nearest",
+        });
+        firstInvalidField.focus();
+      }
+      return;
+    }
+
     updateSubmission({ ...submission, postQs: answers });
     router.push(`/study/${submissionId}/debriefing`);
   };
@@ -108,8 +148,10 @@ export default function PostSurvey({ submissionId }: PostSurveyProps) {
             <LikertScale
               key={q.key}
               label={q.label}
+              options={q.scale}
               value={answers[q.key as keyof PostQs]}
               setValue={(value) => handleChange(q.key, value)}
+              required
             />
           ))}
         </div>
@@ -121,8 +163,10 @@ export default function PostSurvey({ submissionId }: PostSurveyProps) {
             <LikertScale
               key={q.key}
               label={q.label}
+              options={q.scale}
               value={answers[q.key as keyof PostQs]}
               setValue={(value) => handleChange(q.key, value)}
+              required
             />
           ))}
         </div>

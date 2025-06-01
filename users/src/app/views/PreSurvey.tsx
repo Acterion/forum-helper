@@ -6,6 +6,7 @@ import { PreQs, Submission } from "@/types";
 import { getSubmission, updateSubmission } from "@/actions/submissions";
 import { useRouter } from "next/navigation";
 import Loading from "@/components/Loading";
+import { agreementScale, confidenceScale } from "@/static/scales";
 
 interface PreSurveyProps {
   submissionId: string;
@@ -42,7 +43,22 @@ export default function PreSurvey({ submissionId }: PreSurveyProps) {
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    e.currentTarget.checkValidity();
+
+    // Check form validity first
+    if (!e.currentTarget.checkValidity()) {
+      // Find the first invalid field and scroll to it
+      const firstInvalidField = e.currentTarget.querySelector(":invalid") as HTMLElement;
+      if (firstInvalidField) {
+        firstInvalidField.scrollIntoView({
+          behavior: "smooth",
+          block: "center",
+          inline: "nearest",
+        });
+        firstInvalidField.focus();
+      }
+      return;
+    }
+
     updateSubmission({ ...submission, preQs: answers });
     router.push(`/study/${submissionId}/2`);
   };
@@ -78,42 +94,58 @@ export default function PreSurvey({ submissionId }: PreSurveyProps) {
             <LikertScale
               label="I am confident I can write relevant responses to support seeking posts from users."
               value={answers.selfEfficacy1}
+              options={confidenceScale}
               setValue={(value) => handleChange("selfEfficacy1", value)}
+              required
             />
             <LikertScale
               label="I am confident I can write complete responses to support seeking posts from users."
               value={answers.selfEfficacy2}
+              options={confidenceScale}
               setValue={(value) => handleChange("selfEfficacy2", value)}
+              required
             />
             <LikertScale
               label="I am confident I can write helpful responses to support seeking posts from users."
               value={answers.selfEfficacy3}
+              options={confidenceScale}
               setValue={(value) => handleChange("selfEfficacy3", value)}
+              required
             />
             <LikertScale
               label="I am confident I can write accurate responses to support seeking posts from users."
               value={answers.selfEfficacy4}
+              options={confidenceScale}
               setValue={(value) => handleChange("selfEfficacy4", value)}
+              required
             />
             <LikertScale
               label="I am confident I can write appropriate responses to support seeking posts from users."
               value={answers.selfEfficacy5}
+              options={confidenceScale}
               setValue={(value) => handleChange("selfEfficacy5", value)}
+              required
             />
             <LikertScale
               label="I am confident I can write clear responses to support seeking posts from users."
               value={answers.selfEfficacy6}
+              options={confidenceScale}
               setValue={(value) => handleChange("selfEfficacy6", value)}
+              required
             />
             <LikertScale
               label="I am confident I can write empathetic responses to support seeking posts from users."
               value={answers.selfEfficacy7}
+              options={confidenceScale}
               setValue={(value) => handleChange("selfEfficacy7", value)}
+              required
             />
             <LikertScale
               label="I need help in writing my responses."
               value={answers.selfEfficacy8}
+              options={agreementScale}
               setValue={(value) => handleChange("selfEfficacy8", value)}
+              required
             />
           </div>
         </div>

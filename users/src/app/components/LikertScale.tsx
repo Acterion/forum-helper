@@ -1,3 +1,4 @@
+import { agreementScale } from "@/static/scales";
 import React from "react";
 
 interface LikertScaleProps {
@@ -6,26 +7,47 @@ interface LikertScaleProps {
   setValue: (value: number) => void;
   inputProps?: React.InputHTMLAttributes<HTMLInputElement>;
   checkboxes?: boolean;
+  options?: Record<number, string>;
+  required?: boolean;
 }
 
-export default function LikertScale({ value, setValue, label, inputProps, checkboxes = true }: LikertScaleProps) {
+export default function LikertScale({
+  value,
+  setValue,
+  label,
+  inputProps,
+  checkboxes = true,
+  options = agreementScale,
+  required = false,
+}: LikertScaleProps) {
+  // Generate a unique name for this radio group
+  const groupName = React.useMemo(() => `likert-${Math.random().toString(36).substr(2, 9)}`, []);
+
   if (checkboxes) {
     return (
       <div className="flex flex-col space-y-2 mb-4">
         <span className="font-semibold">{label ?? "Level:"}</span>
         <div className="flex justify-between">
-          {[1, 2, 3, 4, 5].map((level) => (
-            <label key={level} className="flex items-center space-x-2">
-              <input
-                type="checkbox"
-                checked={value === level}
-                onChange={() => setValue(level)}
-                className="cursor-pointer"
-                {...inputProps}
-              />
-              <span>{level}</span>
-            </label>
-          ))}
+          {Object.entries(options).map(([level, labelText]) => {
+            const numLevel = Number(level);
+            const inputId = `${groupName}-${numLevel}`;
+            return (
+              <label key={`${numLevel}-${labelText}`} className="flex flex-col items-center space-y-1">
+                <input
+                  type="radio"
+                  id={inputId}
+                  name={groupName}
+                  value={numLevel}
+                  checked={value === numLevel}
+                  onChange={() => setValue(numLevel)}
+                  className="cursor-pointer"
+                  required={required}
+                  {...inputProps}
+                />
+                <span className="text-xs text-center">{labelText}</span>
+              </label>
+            );
+          })}
         </div>
       </div>
     );
@@ -44,6 +66,7 @@ export default function LikertScale({ value, setValue, label, inputProps, checkb
           WebkitAppearance: "none",
           backgroundSize: "auto", // Ensures no fill effect
         }}
+        required={required}
         {...inputProps}
       />
       <div className="flex justify-between text-sm text-gray-500">

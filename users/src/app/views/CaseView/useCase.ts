@@ -1,13 +1,22 @@
 import { getCase, getCases } from "@/actions/cases";
 import { Case } from "@/types";
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
-export const useCaseState = (sequence: number[]) => {
+interface UseCaseStateProps {
+  sequence: number[];
+  submissionId: string;
+}
+
+export const useCaseState = ({ sequence, submissionId }: UseCaseStateProps) => {
   const [casesList, setCasesList] = useState<string[]>([]);
   const [caseNumber, setCaseNumber] = useState(0);
   const [currentCaseId, setCurrentCaseId] = useState("");
   const [currentCase, setCurrentCase] = useState<Case | null>(null);
   const [progress, setProgress] = useState(0);
+  const [isLastCase, setIsLastCase] = useState(false);
+
+  const router = useRouter();
 
   useEffect(() => {
     const fetchCases = async () => {
@@ -22,17 +31,29 @@ export const useCaseState = (sequence: number[]) => {
       setCurrentCase(await getCase(casesList[sequence[caseNumber]]));
     };
     if (casesList.length) fetchCase();
-  }, [caseNumber, casesList]);
+  }, [caseNumber, casesList, sequence]);
 
   useEffect(() => {
     if (casesList.length) {
       setCurrentCaseId(currentCase?.id || "");
     }
-  }, [currentCase]);
+  }, [currentCase, casesList.length]);
 
   useEffect(() => {
     setProgress(((caseNumber + 1) / casesList.length) * 100);
-  }, [caseNumber, casesList]);
+    if (caseNumber === casesList.length - 1) {
+      setIsLastCase(true);
+    }
+  }, [caseNumber, casesList.length]);
+
+  // Navigation handler for moving to next case or finishing
+  const handleNextCase = async () => {
+    if (caseNumber < casesList.length - 1) {
+      setCaseNumber(caseNumber + 1);
+    } else {
+      router.push(`/study/${submissionId}/3`);
+    }
+  };
 
   return {
     casesList,
@@ -42,5 +63,7 @@ export const useCaseState = (sequence: number[]) => {
     setCurrentCaseId,
     currentCase,
     progress,
+    handleNextCase,
+    isLastCase,
   };
 };
