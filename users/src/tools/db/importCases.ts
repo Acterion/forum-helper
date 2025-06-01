@@ -26,21 +26,21 @@ const importCasesFromCSV = (filePath: string): Promise<Case[]> => {
       .pipe(csv({ separator: ";" }))
       .on("data", (row) => {
         const mainPost: Post = {
-          avatar: `https://i.pravatar.cc/150?img=${Math.floor(Math.random() * 70)}`,
+          avatar: `https://avatar.iran.liara.run/public/girl`,
           author: generateFakeAuthor(),
           content: row.Seeker_Post,
           timestamp: generateTimestamp(baseDate, 0).toDateString(),
         };
 
         const answer1: Post = {
-          avatar: `https://i.pravatar.cc/150?img=${Math.floor(Math.random() * 70)}`,
+          avatar: `https://avatar.iran.liara.run/public/girl`,
           author: generateFakeAuthor(),
           content: row.Answer_1,
           timestamp: generateTimestamp(baseDate, 1).toDateString(),
         };
 
         const answer2: Post = {
-          avatar: `https://i.pravatar.cc/150?img=${Math.floor(Math.random() * 70)}`,
+          avatar: `https://avatar.iran.liara.run/public/girl`,
           author: generateFakeAuthor(),
           content: row.Answer_2,
           timestamp: generateTimestamp(baseDate, 2).toDateString(),
