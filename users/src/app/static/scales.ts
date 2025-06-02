@@ -1,11 +1,11 @@
 export type Scale = Record<number, string>;
 
 export const confidenceScale: Scale = {
-  1: "Extremely Unconfident",
-  2: "Unconfident",
-  3: "Neither Unconfident nor Confident",
-  4: "Confident",
-  5: "Extremely Confident",
+  1: "Not at all confident",
+  2: "Slightly confident",
+  3: "Somewhat confident",
+  4: "Quite confident",
+  5: "Extremely confident",
 };
 
 export const agreementScale: Scale = {
@@ -17,9 +17,9 @@ export const agreementScale: Scale = {
 };
 
 export const stressScale: Scale = {
-  1: "Extremely Stressed",
-  2: "Stressed",
-  3: "Neither Stressed nor Relaxed",
-  4: "Relaxed",
-  5: "Extremely Relaxed",
+  1: "Not at all stressed",
+  2: "Slightly stressed",
+  3: "Somewhat stressed",
+  4: "Quite stressed",
+  5: "Extremely stressed",
 };
