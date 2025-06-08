@@ -3,6 +3,7 @@ import { useState, useRef } from "react";
 import { v6 as uuid } from "uuid";
 import { createAiResponse } from "@/actions/ai";
 import { submitCase } from "@/actions/cases";
+import { validateCaseStep1, validateCaseStep2, validateCaseStep3, validateCaseResponseForm } from "./validation";
 
 export const makeNewResponse = (caseId: string, submissionId: string): CaseResponse => ({
   id: uuid(),
@@ -26,7 +27,7 @@ interface UseFormStateProps {
 
 export const useFormState = ({ initialCaseId, submissionId, branch, currentCase, onNextCase }: UseFormStateProps) => {
   const [formState, setFormState] = useState({
-    step: 1,
+    step: 0,
     confidence: 0,
     replyText: "",
     aiSuggestion: "",
@@ -38,10 +39,17 @@ export const useFormState = ({ initialCaseId, submissionId, branch, currentCase,
   });
 
   const [isAiLoading, setIsAiLoading] = useState(false);
+  const [errors, setErrors] = useState<string[]>([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const debounceTimeout = useRef<NodeJS.Timeout | null>(null);
 
   const updateFormState = (newState: Partial<typeof formState>) => {
     setFormState((prev) => ({ ...prev, ...newState }));
+
+    // Clear errors when user makes changes
+    if (errors.length > 0) {
+      setErrors([]);
+    }
   };
 
   const resetForm = () => {
@@ -58,22 +66,7 @@ export const useFormState = ({ initialCaseId, submissionId, branch, currentCase,
     });
   };
 
-  // Form validation helper
-  const validateForm = (form: HTMLFormElement): boolean => {
-    if (!form.checkValidity()) {
-      const firstInvalidField = form.querySelector(":invalid") as HTMLElement;
-      if (firstInvalidField) {
-        firstInvalidField.scrollIntoView({
-          behavior: "smooth",
-          block: "center",
-          inline: "nearest",
-        });
-        firstInvalidField.focus();
-      }
-      return false;
-    }
-    return true;
-  }; // AI assistance handler
+  // AI assistance handler
   const handleAiAssist = async () => {
     if (formState.replyText === "") {
       alert("Please enter a response before using AI Assist");
@@ -114,12 +107,24 @@ export const useFormState = ({ initialCaseId, submissionId, branch, currentCase,
     }, 500);
   };
 
+  // Step 0 form handler (case view introduction)
+  const handleStep0Submit = (e: React.FormEvent) => {
+    e.preventDefault();
+    updateFormState({ step: 1 });
+  };
+
   // Step 1 form handler (confidence rating)
   const handleStep1Submit = (e: React.FormEvent) => {
     e.preventDefault();
-    const form = e.currentTarget as HTMLFormElement;
+    setErrors([]);
 
-    if (!validateForm(form)) return;
+    const validationResult = validateCaseStep1({ confidence: formState.confidence });
+
+    if (!validationResult.success) {
+      const errorMessages = validationResult.error.errors.map((err) => `${err.path.join(".")}: ${err.message}`);
+      setErrors(errorMessages);
+      return;
+    }
 
     updateFormState({ step: 2 });
   };
@@ -127,9 +132,14 @@ export const useFormState = ({ initialCaseId, submissionId, branch, currentCase,
   // Step 2 form handler (response writing)
   const handleStep2Submit = (e: React.FormEvent) => {
     e.preventDefault();
+    setErrors([]);
 
-    if (!formState.replyText.trim()) {
-      alert("Response can't be empty");
+    const validationResult = validateCaseStep2({ replyText: formState.replyText });
+
+    if (!validationResult.success) {
+      const errorMessages = validationResult.error.errors.map((err) => `${err.message}`);
+      setErrors(errorMessages);
+
       const textarea = e.currentTarget.querySelector("textarea") as HTMLTextAreaElement;
       if (textarea) {
         textarea.scrollIntoView({
@@ -148,22 +158,62 @@ export const useFormState = ({ initialCaseId, submissionId, branch, currentCase,
   // Step 3 form handler (final submission)
   const handleStep3Submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const form = e.currentTarget as HTMLFormElement;
+    setErrors([]);
+    setIsSubmitting(true);
 
-    if (!validateForm(form)) return;
+    try {
+      // Validate step 3 data
+      const step3ValidationResult = validateCaseStep3({
+        postConfidence: formState.postConfidence,
+        postStress: formState.postStress,
+      });
 
-    await submitCase({
-      ...formState.response,
-      caseId: initialCaseId,
-      preConfidence: formState.confidence,
-      postConfidence: formState.postConfidence,
-      replyText: formState.replyText,
-      aiSuggestion: formState.aiSuggestion,
-      actionSequence: formState.actionSequence,
-    });
+      if (!step3ValidationResult.success) {
+        const errorMessages = step3ValidationResult.error.errors.map((err) => `${err.path.join(".")}: ${err.message}`);
+        setErrors(errorMessages);
+        return;
+      }
 
-    await onNextCase();
-    resetForm();
+      // Validate complete case response
+      const completeFormData = {
+        preConfidence: formState.confidence,
+        replyText: formState.replyText,
+        postConfidence: formState.postConfidence,
+        postStress: formState.postStress,
+        aiSuggestion: formState.aiSuggestion,
+        actionSequence: formState.actionSequence,
+      };
+
+      const responseValidationResult = validateCaseResponseForm(completeFormData);
+
+      if (!responseValidationResult.success) {
+        const errorMessages = responseValidationResult.error.errors.map(
+          (err) => `${err.path.join(".")}: ${err.message}`
+        );
+        setErrors(errorMessages);
+        return;
+      }
+
+      // Submit the validated data
+      await submitCase({
+        ...formState.response,
+        caseId: initialCaseId,
+        preConfidence: formState.confidence,
+        postConfidence: formState.postConfidence,
+        postStress: formState.postStress,
+        replyText: formState.replyText,
+        aiSuggestion: formState.aiSuggestion,
+        actionSequence: formState.actionSequence,
+      });
+
+      await onNextCase();
+      resetForm();
+    } catch (error) {
+      console.error("Error submitting case:", error);
+      setErrors(["An error occurred while submitting your response. Please try again."]);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return {
@@ -172,8 +222,11 @@ export const useFormState = ({ initialCaseId, submissionId, branch, currentCase,
     setFormState,
     resetForm,
     isAiLoading,
+    isSubmitting,
+    errors,
     handleAiAssist,
     handleReplyChange,
+    handleStep0Submit,
     handleStep1Submit,
     handleStep2Submit,
     handleStep3Submit,

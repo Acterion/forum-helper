@@ -1,6 +1,3 @@
-import dotenv from "dotenv";
-dotenv.config({ path: ".env.local" });
-
 import { sql } from "drizzle-orm";
 
 async function main() {

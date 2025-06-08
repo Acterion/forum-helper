@@ -11,6 +11,26 @@ interface LikertScaleProps {
   required?: boolean;
 }
 
+// Helper function to parse markdown-style bold text
+function parseMarkdownBold(text: string): React.ReactNode[] {
+  if (!text) return [text];
+
+  const parts = text.split(/(\*\*.*?\*\*)/g);
+
+  return parts.map((part, index) => {
+    if (part.startsWith("**") && part.endsWith("**")) {
+      // Remove the ** and make it bold
+      const boldText = part.slice(2, -2);
+      return (
+        <strong key={index} className="font-bold">
+          {boldText}
+        </strong>
+      );
+    }
+    return part;
+  });
+}
+
 export default function LikertScale({
   value,
   setValue,
@@ -25,8 +45,8 @@ export default function LikertScale({
 
   if (checkboxes) {
     return (
-      <div className="flex flex-col space-y-2 mb-4">
-        <span className="font-semibold">{label ?? "Level:"}</span>
+      <div className="flex flex-col space-y-2 my-4 mb-12">
+        <span className="font-semibold">{parseMarkdownBold(label ?? "Level:")}</span>
         <div className="flex justify-between">
           {Object.entries(options).map(([level, labelText]) => {
             const numLevel = Number(level);
@@ -54,7 +74,7 @@ export default function LikertScale({
   }
   return (
     <div className="flex flex-col space-y-2 mb-4">
-      <span className="font-semibold">{label ?? "Level:"}</span>
+      <span className="font-semibold">{parseMarkdownBold(label ?? "Level:")}</span>
       <input
         type="range"
         min="1"

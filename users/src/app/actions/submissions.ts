@@ -1,9 +1,17 @@
 "use server";
 
 import { db } from "@/db";
-import { PostQs, PreQs, Submission } from "@/types";
-import { submission, branch_counts } from "@/schema";
+import {
+  Submission,
+  InsertSubmission,
+  selectSubmissionSchema,
+  insertSubmissionSchema,
+  preQsSchema,
+  postQsSchema,
+} from "@/types";
+import { submission, branch_counts } from "../../db/schema";
 import { eq, sql } from "drizzle-orm";
+import { validateJsonField } from "@/lib/validation";
 
 async function choseBranch() {
   const counts = await db.select({ branch: branch_counts.branch, count: branch_counts.count }).from(branch_counts);
@@ -23,13 +31,13 @@ async function choseSequence(branch: "branch-a" | "branch-b") {
     .where(eq(branch_counts.branch, branch));
 
   //find the index of the sequence.count with the lowest count
-  const minIndex = sequenceCounts[0].count.findIndex((c) => c === Math.min(...sequenceCounts[0].count));
+  const minIndex = sequenceCounts[0].count.findIndex((c: number) => c === Math.min(...sequenceCounts[0].count));
 
   return minIndex;
 }
 
 export async function createSubmission(
-  sub: Omit<Submission, "branch" | "dataConsent" | "debriefingConsent" | "sequence">
+  sub: Omit<InsertSubmission, "branch" | "dataConsent" | "debriefingConsent" | "sequence">
 ) {
   await db
     .insert(submission)
@@ -52,7 +60,12 @@ export async function getSubmission(submissionId: string): Promise<Submission | 
     console.error(`Invalid or null branch value "${s.branch}" for submission ID:`, submissionId);
     return null;
   }
-  return {
+
+  // Validate and parse the JSON fields
+  const validatedPreQs = s.preQs ? validateJsonField(preQsSchema, s.preQs, "preQs") : undefined;
+  const validatedPostQs = s.postQs ? validateJsonField(postQsSchema, s.postQs, "postQs") : undefined;
+
+  const submissionData = {
     id: s.id,
     dataConsent: s.dataConsent ?? undefined,
     debriefingConsent: s.debriefingConsent ?? undefined,
@@ -61,20 +74,35 @@ export async function getSubmission(submissionId: string): Promise<Submission | 
     prolificPid: s.prolificPid ?? undefined,
     studyId: s.studyId ?? undefined,
     sessionId: s.sessionId ?? undefined,
-    preQs: (s.preQs as PreQs) ?? undefined,
-    postQs: (s.postQs as PostQs) ?? undefined,
+    preQs: validatedPreQs,
+    postQs: validatedPostQs,
   };
+
+  // Validate the entire submission object
+  return selectSubmissionSchema.parse(submissionData);
 }
 
-type UpdatableSubmission = Partial<Omit<Submission, "id">> & {
+export type UpdatableSubmission = Partial<Submission> & {
   id: string;
 };
 
 export async function updateSubmission(input: UpdatableSubmission) {
   const { id, ...rest } = input;
 
+  // Validate the entire input first
+  const validatedInput = selectSubmissionSchema.partial().extend({ id: selectSubmissionSchema.shape.id }).parse(input);
+
+  // Validate nested JSON fields if they exist
+  const processedRest: any = { ...rest };
+  if (processedRest.preQs) {
+    processedRest.preQs = validateJsonField(preQsSchema, processedRest.preQs, "preQs");
+  }
+  if (processedRest.postQs) {
+    processedRest.postQs = validateJsonField(postQsSchema, processedRest.postQs, "postQs");
+  }
+
   //Generate update object
-  const data = Object.entries(rest).reduce((acc, [key, value]) => {
+  const data = Object.entries(processedRest).reduce((acc, [key, value]) => {
     if (value !== undefined) {
       // eslint-disable-next-line  @typescript-eslint/no-explicit-any
       acc[key as keyof typeof acc] = value as any;
@@ -87,7 +115,7 @@ export async function updateSubmission(input: UpdatableSubmission) {
     return;
   }
 
-  await db.update(submission).set(data).where(eq(submission.id, id)).execute();
+  await db.update(submission).set(data).where(eq(submission.id, validatedInput.id!)).execute();
 }
 
 export async function assignSubmissionBranch(submissionId: string) {
