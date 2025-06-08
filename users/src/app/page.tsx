@@ -4,7 +4,7 @@ import { Suspense } from "react";
 import Loading from "@/components/Loading"; // Assuming Loading component path
 
 export default function Home() {
-  initDB();
+  // initDB();
   return (
     <main className="container mx-auto p-6">
       <Suspense fallback={<Loading />}>
