@@ -72,9 +72,9 @@ export default function ThreadView({ submissionId, branch, sequence }: ThreadVie
                 <p className="text-lg font-medium">Right now, you are in the second part.</p>
 
                 <p className="text-base">
-                  On the next few pages, you'll be randomized to see five example conversations from an online health
-                  forum focused on women's health. For each one, you will be asked to write a response to a question
-                  posted by a user.
+                  On the next few pages, you&apos;ll be randomized to see five example conversations from an online
+                  health forum focused on women&apos;s health. For each one, you will be asked to write a response to a
+                  question posted by a user.
                 </p>
 
                 <p className="text-base">
@@ -84,8 +84,9 @@ export default function ThreadView({ submissionId, branch, sequence }: ThreadVie
                 </p>
 
                 <p className="text-base">
-                  Please <span className="font-bold">don't use any outside resources to help with your answers</span> —
-                  we are interested in responses based on your experience and/or knowledge of the topic.
+                  Please{" "}
+                  <span className="font-bold">don&apos;t use any outside resources to help with your answers</span> — we
+                  are interested in responses based on your experience and/or knowledge of the topic.
                 </p>
               </div>
             </div>

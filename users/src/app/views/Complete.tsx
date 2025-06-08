@@ -15,7 +15,7 @@ export default function Complete() {
     } else {
       console.error("Prolific completion URL is not configured in environment variables (PROLIFIC_COMPLETION_URL).");
     }
-  }, []);
+  }, [prolificCompletionUrl]);
 
   return (
     <div className="w-full max-w-4xl mx-auto p-6 border rounded-lg">

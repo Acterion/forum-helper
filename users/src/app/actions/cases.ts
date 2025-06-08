@@ -46,10 +46,7 @@ export async function submitCase(caseRes: CaseResponse) {
     validateJsonField(actionSequenceSchema, validatedCaseRes.actionSequence, "actionSequence");
   }
 
-  await db
-    .insert(case_response)
-    .values(validatedCaseRes as any)
-    .execute();
+  await db.insert(case_response).values(validatedCaseRes).execute();
 }
 
 export async function deleteCaseResponse(caseId: string) {

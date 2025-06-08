@@ -93,7 +93,7 @@ export async function updateSubmission(input: UpdatableSubmission) {
   const validatedInput = selectSubmissionSchema.partial().extend({ id: selectSubmissionSchema.shape.id }).parse(input);
 
   // Validate nested JSON fields if they exist
-  const processedRest: any = { ...rest };
+  const processedRest: Partial<typeof input> = { ...rest };
   if (processedRest.preQs) {
     processedRest.preQs = validateJsonField(preQsSchema, processedRest.preQs, "preQs");
   }

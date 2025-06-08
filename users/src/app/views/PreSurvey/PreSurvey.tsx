@@ -148,7 +148,7 @@ export default function PreSurvey({ submissionId }: PreSurveyProps) {
             <p className="text-base">
               In this section, we would like to know about your experience using online forums to seek or share
               information. Moreover, we are interested in how confident you feel when it comes to writing supportive
-              responses in these forums. By "supportive," we refer to responses that are relevant, complete, helpful,
+              responses in these forums. By &quot;supportive,&quot; we refer to responses that are relevant, complete, helpful,
               accurate, appropriate, clear, and empathetic. Lastly, we would like to understand whether you feel you
               would need support when writing supportive responses.
             </p>
