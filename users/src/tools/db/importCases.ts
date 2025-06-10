@@ -66,19 +66,31 @@ const importCasesFromCSV = (filePath: string): Promise<Case[]> => {
       answer_2: string;
     }
 
+    const mainAuthor = generateFakeAuthor();
+    let author1 = generateFakeAuthor();
+    if (author1 === mainAuthor) {
+      // Ensure author1 is different from mainAuthor
+      author1 = generateFakeAuthor();
+    }
+    let author2 = generateFakeAuthor();
+    if (author2 === mainAuthor || author2 === author1) {
+      // Ensure author2 is different from both mainAuthor and author1
+      author2 = generateFakeAuthor();
+    }
+
     fs.createReadStream(filePath)
       .pipe(csv({ separator: "," }))
       .on("data", (row: CsvRow) => {
         const mainPost: Post = {
           avatar: `https://avatar.iran.liara.run/public/girl?username=${generateFakeAuthor()}`,
-          author: generateFakeAuthor(),
+          author: mainAuthor,
           content: row.post,
           timestamp: generateTimestamp(baseDate, 0).toDateString(),
         };
 
         const answer1: Post = {
           avatar: `https://avatar.iran.liara.run/public/girl?username=${generateFakeAuthor()}`,
-          author: generateFakeAuthor() === mainPost.author ? generateFakeAuthor() : mainPost.author,
+          author: author1,
           content: row.answer_1,
           timestamp: generateTimestamp(baseDate, 1).toDateString(),
         };
@@ -86,7 +98,7 @@ const importCasesFromCSV = (filePath: string): Promise<Case[]> => {
         const answer2: Post | undefined = row.answer_2
           ? {
               avatar: `https://avatar.iran.liara.run/public/girl?username=${generateFakeAuthor()}`,
-              author: generateFakeAuthor() === mainPost.author ? generateFakeAuthor() : mainPost.author,
+              author: author2,
               content: row.answer_2,
               timestamp: generateTimestamp(baseDate, 2).toDateString(),
             }
