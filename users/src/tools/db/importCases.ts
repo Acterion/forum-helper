@@ -66,21 +66,21 @@ const importCasesFromCSV = (filePath: string): Promise<Case[]> => {
       answer_2: string;
     }
 
-    const mainAuthor = generateFakeAuthor();
-    let author1 = generateFakeAuthor();
-    if (author1 === mainAuthor) {
-      // Ensure author1 is different from mainAuthor
-      author1 = generateFakeAuthor();
-    }
-    let author2 = generateFakeAuthor();
-    if (author2 === mainAuthor || author2 === author1) {
-      // Ensure author2 is different from both mainAuthor and author1
-      author2 = generateFakeAuthor();
-    }
-
     fs.createReadStream(filePath)
       .pipe(csv({ separator: "," }))
       .on("data", (row: CsvRow) => {
+        const mainAuthor = generateFakeAuthor();
+        let author1 = generateFakeAuthor();
+        if (author1 === mainAuthor) {
+          // Ensure author1 is different from mainAuthor
+          author1 = generateFakeAuthor();
+        }
+        let author2 = generateFakeAuthor();
+        if (author2 === mainAuthor || author2 === author1) {
+          // Ensure author2 is different from both mainAuthor and author1
+          author2 = generateFakeAuthor();
+        }
+
         const mainPost: Post = {
           avatar: `https://avatar.iran.liara.run/public/girl?username=${generateFakeAuthor()}`,
           author: mainAuthor,
