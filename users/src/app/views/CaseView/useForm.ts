@@ -68,20 +68,22 @@ export const useFormState = ({ initialCaseId, submissionId, branch, currentCase,
 
   // AI assistance handler
   const handleAiAssist = async () => {
-    if (formState.replyText === "") {
-      alert("Please enter a response before using AI Assist");
+    if (formState.replyText === "" || formState.replyText.trim().split(/\s+/).filter(Boolean).length < 30) {
+      alert("Please enter a response longer than 30 words before using AI Assist");
       return;
     }
     if (branch !== "branch-a" || !currentCase) return;
 
     setIsAiLoading(true);
     const prompt = `
-    Main post: ${JSON.stringify({
+    **Main post:** ${JSON.stringify({
       author: currentCase.mainPost.author,
       content: currentCase.mainPost.content,
     })},
-    Thread replies: ${JSON.stringify(currentCase.replies.map((r: Post) => ({ author: r.author, content: r.content })))}
-    User's reply: ${formState.replyText}
+    **Thread replies:** ${JSON.stringify(
+      currentCase.replies.map((r: Post) => ({ author: r.author, content: r.content }))
+    )}
+    **User's reply:** ${formState.replyText}
     `;
 
     const res = await createAiResponse(prompt);

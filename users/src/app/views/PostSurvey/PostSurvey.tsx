@@ -67,7 +67,11 @@ export default function PostSurvey({ submissionId }: PostSurveyProps) {
           label: "I would like to have had help from AI to improve my responses.",
           scale: agreementScale,
         },
-        { key: "stress", label: "It was challenging or stressful to write responses to posts.", scale: stressScale },
+        {
+          key: "stress",
+          label: "How stressful did you feel when writing the answer to the posts?",
+          scale: stressScale,
+        },
       ];
   const selfEfficacyQuestions = [
     {
