@@ -1,4 +1,4 @@
-import { CaseResponse, Case, Post } from "@/types";
+import { CaseResponse, Case, Post, ActionSequence } from "@/types";
 import { useState, useRef } from "react";
 import { v6 as uuid } from "uuid";
 import { createAiResponse } from "@/actions/ai";
@@ -34,7 +34,7 @@ export const useFormState = ({ initialCaseId, submissionId, branch, currentCase,
     comment: "",
     postConfidence: 0,
     postStress: 0,
-    actionSequence: [] as { action: string; value: string }[],
+    actionSequence: [] as { value: string; action: string; timestamp: string }[],
     response: makeNewResponse(initialCaseId, submissionId),
   });
 
@@ -90,7 +90,10 @@ export const useFormState = ({ initialCaseId, submissionId, branch, currentCase,
     if (res) {
       updateFormState({
         aiSuggestion: res,
-        actionSequence: [...formState.actionSequence, { action: "ai-assist", value: res }],
+        actionSequence: [
+          ...formState.actionSequence,
+          { action: "ai-assist", value: res, timestamp: new Date().toISOString() },
+        ],
       });
     }
     setIsAiLoading(false);
@@ -104,7 +107,10 @@ export const useFormState = ({ initialCaseId, submissionId, branch, currentCase,
     if (debounceTimeout.current) clearTimeout(debounceTimeout.current);
     debounceTimeout.current = setTimeout(() => {
       updateFormState({
-        actionSequence: [...formState.actionSequence, { action: "manual-edit", value: newValue }],
+        actionSequence: [
+          ...formState.actionSequence,
+          { action: "manual-edit", value: newValue, timestamp: new Date().toISOString() },
+        ],
       });
     }, 500);
   };

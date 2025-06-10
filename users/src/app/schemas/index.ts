@@ -1,3 +1,4 @@
+import { time } from "console";
 import { title } from "process";
 import { z } from "zod";
 
@@ -35,6 +36,7 @@ export const postQsSchema = z.object({
 export const actionSequenceItemSchema = z.object({
   action: z.string(),
   value: z.string(),
+  timestamp: z.string(),
 });
 
 export const actionSequenceSchema = z.array(actionSequenceItemSchema);

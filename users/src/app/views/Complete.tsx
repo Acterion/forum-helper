@@ -5,7 +5,7 @@ import Loading from "../components/Loading";
 
 export default function Complete() {
   const [prolificCompletionUrl, setProlificCompletionUrl] = useState<string>(
-    "https://app.prolific.com/submissions/complete?cc=C16GBRWH"
+    "https://app.prolific.com/submissions/complete?cc=C63MEXCJ"
   );
   useEffect(() => {
     if (process.env.PROLIFIC_COMPLETION_URL) setProlificCompletionUrl(process.env.PROLIFIC_COMPLETION_URL);
