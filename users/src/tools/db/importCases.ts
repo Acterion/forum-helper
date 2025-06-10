@@ -25,6 +25,23 @@ const generateFakeAuthor = (): string => {
     "Chloe",
     "Zoe",
     "Ella",
+    "Aria",
+    "Scarlett",
+    "Luna",
+    "Harper",
+    "Sofia",
+    "Camila",
+    "Layla",
+    "Riley",
+    "Aubrey",
+    "Aaliyah",
+    "Madison",
+    "Ariana",
+    "Brooklyn",
+    "Nora",
+    "Hannah",
+    "Lily",
+    "Jenny",
   ];
   return authors[Math.floor(Math.random() * authors.length)];
 };
@@ -61,7 +78,7 @@ const importCasesFromCSV = (filePath: string): Promise<Case[]> => {
 
         const answer1: Post = {
           avatar: `https://avatar.iran.liara.run/public/girl?username=${generateFakeAuthor()}`,
-          author: generateFakeAuthor(),
+          author: generateFakeAuthor() === mainPost.author ? generateFakeAuthor() : mainPost.author,
           content: row.answer_1,
           timestamp: generateTimestamp(baseDate, 1).toDateString(),
         };
@@ -69,7 +86,7 @@ const importCasesFromCSV = (filePath: string): Promise<Case[]> => {
         const answer2: Post | undefined = row.answer_2
           ? {
               avatar: `https://avatar.iran.liara.run/public/girl?username=${generateFakeAuthor()}`,
-              author: generateFakeAuthor(),
+              author: generateFakeAuthor() === mainPost.author ? generateFakeAuthor() : mainPost.author,
               content: row.answer_2,
               timestamp: generateTimestamp(baseDate, 2).toDateString(),
             }
