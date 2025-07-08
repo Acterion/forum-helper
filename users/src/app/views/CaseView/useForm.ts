@@ -23,9 +23,19 @@ interface UseFormStateProps {
   branch: string;
   currentCase: Case | null;
   onNextCase: () => Promise<void>;
+  aiWarningShown: boolean;
+  setAiWarningShown: (shown: boolean) => void;
 }
 
-export const useFormState = ({ initialCaseId, submissionId, branch, currentCase, onNextCase }: UseFormStateProps) => {
+export const useFormState = ({
+  initialCaseId,
+  submissionId,
+  branch,
+  currentCase,
+  onNextCase,
+  aiWarningShown,
+  setAiWarningShown,
+}: UseFormStateProps) => {
   const [formState, setFormState] = useState({
     step: 0,
     confidence: 0,
@@ -36,6 +46,7 @@ export const useFormState = ({ initialCaseId, submissionId, branch, currentCase,
     postStress: 0,
     actionSequence: [] as { value: string; action: string; timestamp: string }[],
     response: makeNewResponse(initialCaseId, submissionId),
+    showAIWarningDialog: false,
   });
 
   const [isAiLoading, setIsAiLoading] = useState(false);
@@ -63,6 +74,7 @@ export const useFormState = ({ initialCaseId, submissionId, branch, currentCase,
       postStress: 0,
       actionSequence: [],
       response: makeNewResponse(initialCaseId, submissionId),
+      showAIWarningDialog: false,
     });
   };
 
@@ -97,6 +109,27 @@ export const useFormState = ({ initialCaseId, submissionId, branch, currentCase,
       });
     }
     setIsAiLoading(false);
+  };
+
+  const handleAIDialogConfirm = () => {
+    updateFormState({ showAIWarningDialog: false });
+    handleAiAssist();
+    updateFormState({
+      actionSequence: [
+        ...formState.actionSequence,
+        { action: "ai-assist-confirmed", value: formState.aiSuggestion, timestamp: new Date().toISOString() },
+      ],
+    });
+  };
+
+  const handleAIDialogCancel = () => {
+    updateFormState({ showAIWarningDialog: false });
+    updateFormState({
+      actionSequence: [
+        ...formState.actionSequence,
+        { action: "ai-assist-cancelled", value: formState.aiSuggestion, timestamp: new Date().toISOString() },
+      ],
+    });
   };
 
   // Reply text change handler with debouncing
@@ -157,6 +190,18 @@ export const useFormState = ({ initialCaseId, submissionId, branch, currentCase,
         });
         textarea.focus();
       }
+      return;
+    }
+
+    if (formState.aiSuggestion.length === 0 && !aiWarningShown) {
+      updateFormState({
+        showAIWarningDialog: true,
+        actionSequence: [
+          ...formState.actionSequence,
+          { action: "no-ai-suggestion", value: formState.replyText, timestamp: new Date().toISOString() },
+        ],
+      });
+      setAiWarningShown(true);
       return;
     }
 
@@ -238,5 +283,7 @@ export const useFormState = ({ initialCaseId, submissionId, branch, currentCase,
     handleStep1Submit,
     handleStep2Submit,
     handleStep3Submit,
+    handleAIDialogConfirm,
+    handleAIDialogCancel,
   };
 };

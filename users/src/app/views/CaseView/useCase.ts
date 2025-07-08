@@ -15,6 +15,7 @@ export const useCaseState = ({ sequence, submissionId }: UseCaseStateProps) => {
   const [currentCase, setCurrentCase] = useState<Case | null>(null);
   const [progress, setProgress] = useState(0);
   const [isLastCase, setIsLastCase] = useState(false);
+  const [aiWarningShown, setAiWarningShown] = useState(false);
 
   const router = useRouter();
 
@@ -65,5 +66,7 @@ export const useCaseState = ({ sequence, submissionId }: UseCaseStateProps) => {
     progress,
     handleNextCase,
     isLastCase,
+    aiWarningShown,
+    setAiWarningShown,
   };
 };

@@ -8,6 +8,16 @@ import { useFormState } from "./useForm";
 import { useCaseState } from "./useCase";
 import { Submission } from "@/types";
 import { confidenceScale, stressScale } from "@/static/scales";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface ThreadViewProps {
   submissionId: string;
@@ -16,7 +26,7 @@ interface ThreadViewProps {
 }
 
 export default function ThreadView({ submissionId, branch, sequence }: ThreadViewProps) {
-  const { currentCase, progress, handleNextCase, isLastCase } = useCaseState({
+  const { currentCase, progress, handleNextCase, isLastCase, aiWarningShown, setAiWarningShown } = useCaseState({
     sequence,
     submissionId,
   });
@@ -33,12 +43,16 @@ export default function ThreadView({ submissionId, branch, sequence }: ThreadVie
     handleStep1Submit,
     handleStep2Submit,
     handleStep3Submit,
+    handleAIDialogConfirm,
+    handleAIDialogCancel,
   } = useFormState({
     initialCaseId: currentCase?.id || "",
     submissionId,
     branch: branch || "not-set",
     currentCase,
     onNextCase: handleNextCase,
+    aiWarningShown,
+    setAiWarningShown,
   });
 
   if (!currentCase) return <Loading />;
@@ -290,6 +304,19 @@ export default function ThreadView({ submissionId, branch, sequence }: ThreadVie
             </button>
           </form>
         )}
+        {/* Attention Check Dialog */}
+        <AlertDialog open={formState.showAIWarningDialog} onOpenChange={() => {}}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>AI Help</AlertDialogTitle>
+              <AlertDialogDescription>Would you like to use AI to improve your response?</AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel onClick={handleAIDialogCancel}>No</AlertDialogCancel>
+              <AlertDialogAction onClick={handleAIDialogConfirm}>Yes</AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </div>
   );
