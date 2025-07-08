@@ -226,7 +226,7 @@ export default function ThreadView({ submissionId, branch, sequence }: ThreadVie
               <button
                 type="button"
                 onClick={handleAiAssist}
-                className="w-full py-3 text-base font-medium bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 min-h-12 flex items-center justify-center transition-colors border border-gray-300">
+                className="w-full py-3 text-base font-medium bg-green-200 text-gray-700 rounded-md hover:bg-gray-200 min-h-12 flex items-center justify-center transition-colors border border-gray-300">
                 {isAiLoading ? <LoadingDots /> : "Ask AI for help"}
               </button>
             )}
