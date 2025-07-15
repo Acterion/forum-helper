@@ -41,17 +41,20 @@ export default function PostSurvey({ submissionId }: PostSurveyProps) {
     ? [
         {
           key: "helpfulness",
-          label: "Feedback shown to me was helpful in improving my responses.",
+          label:
+            "Feedback shown to me was helpful in improving my responses. (If you did not click on AI help in this study at least once, please select “Neither Agree nor Disagree”)",
           scale: agreementScale,
         },
         {
           key: "empathy",
-          label: "Feedback shown to me was helpful in making my responses more empathic.",
+          label:
+            "Feedback shown to me was helpful in making my responses more empathic. (If you did not click on AI help in this study at least once, please select “Neither Agree nor Disagree”)",
           scale: agreementScale,
         },
         {
           key: "actionability",
-          label: "Feedback shown to me was easy to incorporate into the final response.",
+          label:
+            "Feedback shown to me was easy to incorporate into the final response. (If you did not click on AI help in this study at least once, please select “Neither Agree nor Disagree”)",
           scale: agreementScale,
         },
         { key: "stress", label: "It was challenging or stressful to write responses to posts.", scale: stressScale },

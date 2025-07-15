@@ -23,19 +23,9 @@ interface UseFormStateProps {
   branch: string;
   currentCase: Case | null;
   onNextCase: () => Promise<void>;
-  aiWarningShown: boolean;
-  setAiWarningShown: (shown: boolean) => void;
 }
 
-export const useFormState = ({
-  initialCaseId,
-  submissionId,
-  branch,
-  currentCase,
-  onNextCase,
-  aiWarningShown,
-  setAiWarningShown,
-}: UseFormStateProps) => {
+export const useFormState = ({ initialCaseId, submissionId, branch, currentCase, onNextCase }: UseFormStateProps) => {
   const [formState, setFormState] = useState({
     step: 0,
     confidence: 0,
@@ -47,6 +37,7 @@ export const useFormState = ({
     actionSequence: [] as { value: string; action: string; timestamp: string }[],
     response: makeNewResponse(initialCaseId, submissionId),
     showAIWarningDialog: false,
+    aiDialogShown: false,
   });
 
   const [isAiLoading, setIsAiLoading] = useState(false);
@@ -75,6 +66,7 @@ export const useFormState = ({
       actionSequence: [],
       response: makeNewResponse(initialCaseId, submissionId),
       showAIWarningDialog: false,
+      aiDialogShown: false,
     });
   };
 
@@ -123,7 +115,7 @@ export const useFormState = ({
   };
 
   const handleAIDialogCancel = () => {
-    updateFormState({ showAIWarningDialog: false });
+    updateFormState({ showAIWarningDialog: false, aiDialogShown: true });
     updateFormState({
       actionSequence: [
         ...formState.actionSequence,
@@ -193,7 +185,7 @@ export const useFormState = ({
       return;
     }
 
-    if (formState.aiSuggestion.length === 0 && !aiWarningShown) {
+    if (formState.aiSuggestion.length === 0 && !formState.aiDialogShown && branch === "branch-a") {
       updateFormState({
         showAIWarningDialog: true,
         actionSequence: [
@@ -201,7 +193,6 @@ export const useFormState = ({
           { action: "no-ai-suggestion", value: formState.replyText, timestamp: new Date().toISOString() },
         ],
       });
-      setAiWarningShown(true);
       return;
     }
 

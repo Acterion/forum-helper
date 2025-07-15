@@ -51,8 +51,6 @@ export default function ThreadView({ submissionId, branch, sequence }: ThreadVie
     branch: branch || "not-set",
     currentCase,
     onNextCase: handleNextCase,
-    aiWarningShown,
-    setAiWarningShown,
   });
 
   if (!currentCase) return <Loading />;
