@@ -47,3 +47,9 @@ users/src/tools/db/Seeker Posts \+ Answers - Sheet1.csv
 *.csv
 
 *.db
+
+data_analysis/.ipynb_checkpoints/
+
+data_analysis/__pycache__/
+
+data_analysis/results/
