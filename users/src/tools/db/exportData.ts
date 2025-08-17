@@ -52,6 +52,7 @@ export default async function exportData() {
       { id: "preConfidence", title: "Pre Confidence" },
       { id: "postConfidence", title: "Post Confidence" },
       { id: "postStress", title: "Post Stress" },
+      { id: "actionSequence", title: "Action Sequence" },
     ],
   });
   csvWriter
