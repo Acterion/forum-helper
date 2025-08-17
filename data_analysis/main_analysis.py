@@ -22,7 +22,7 @@ from visualization import (
     plot_power_analysis, plot_demographics_distribution
 )
 from export_utils import (
-    export_publication_materials, create_analysis_report, 
+    export_publication_materials, create_analysis_report,
     print_file_list, create_results_summary
 )
 
@@ -41,14 +41,14 @@ def print_header():
 def run_primary_analysis(participant_data, output_dir='.'):
     """
     Run the primary analysis pipeline.
-    
+
     Parameters:
     -----------
     participant_data : pandas.DataFrame
         Participant-level dataset
     output_dir : str
         Directory for output files
-        
+
     Returns:
     --------
     dict : Analysis results
@@ -56,30 +56,30 @@ def run_primary_analysis(participant_data, output_dir='.'):
     print("\n" + "="*60)
     print("🔬 PRIMARY ANALYSIS PIPELINE")
     print("="*60)
-    
+
     results = {}
-    
+
     # 1. Descriptive Statistics
     print("\n📊 1. DESCRIPTIVE STATISTICS")
     print("-" * 40)
-    
+
     from export_utils import create_descriptive_table
     desc_table = create_descriptive_table(
-        participant_data, 
-        measures=['self_efficacy_change', 'post_stress'] if 'post_stress' in participant_data.columns 
+        participant_data,
+        measures=['self_efficacy_change', 'post_stress'] if 'post_stress' in participant_data.columns
         else ['self_efficacy_change']
     )
     print(desc_table.to_string(index=False))
     results['descriptives'] = desc_table
-    
+
     # 2. Statistical Tests
     print("\n🧮 2. STATISTICAL TESTS")
     print("-" * 40)
-    
+
     # Self-efficacy change
     se_results = run_statistical_tests(
         participant_data, measure_col='self_efficacy_change')
-    
+
     print(f"Self-Efficacy Change:")
     print(f"  Effect Size (Cohen's d): {se_results['effect_size']:.3f} " +
           f"({se_results.get('interpretation', 'Unknown')})")
@@ -87,28 +87,29 @@ def run_primary_analysis(participant_data, output_dir='.'):
           f"p = {se_results['t_test']['p_value']:.3f}")
     print(f"  Mann-Whitney U: U = {se_results['mann_whitney']['statistic']:.1f}, " +
           f"p = {se_results['mann_whitney']['p_value']:.3f}")
-    
+
     results['self_efficacy_results'] = se_results
-    
+
     # Post-stress (if available)
     stress_results = None
     if 'post_stress' in participant_data.columns:
         stress_results = run_statistical_tests(
             participant_data, measure_col='post_stress')
-        
+
         print(f"\nPost-Intervention Stress:")
-        print(f"  Effect Size (Cohen's d): {stress_results['effect_size']:.3f}")
+        print(
+            f"  Effect Size (Cohen's d): {stress_results['effect_size']:.3f}")
         print(f"  t-test: t = {stress_results['t_test']['statistic']:.3f}, " +
               f"p = {stress_results['t_test']['p_value']:.3f}")
-        
+
         results['stress_results'] = stress_results
-    
+
     # 3. Create Visualizations
     print("\n📈 3. CREATING VISUALIZATIONS")
     print("-" * 40)
-    
+
     figures = []
-    
+
     # Primary outcome plot
     fig1 = plot_group_comparison(
         participant_data, 'self_efficacy_change',
@@ -116,7 +117,7 @@ def run_primary_analysis(participant_data, output_dir='.'):
         f"{output_dir}/{OUTPUT_FILES['self_efficacy_plot']}"
     )
     figures.append(fig1)
-    
+
     # Secondary outcome plot (if available)
     if 'post_stress' in participant_data.columns:
         fig2 = plot_group_comparison(
@@ -125,37 +126,37 @@ def run_primary_analysis(participant_data, output_dir='.'):
             f"{output_dir}/{OUTPUT_FILES['stress_plot']}"
         )
         figures.append(fig2)
-    
+
     # Pre-post comparison
     if 'pre_self_efficacy' in participant_data.columns and 'post_self_efficacy' in participant_data.columns:
         fig3 = plot_pre_post_comparison(
-            participant_data, 
+            participant_data,
             f"{output_dir}/{OUTPUT_FILES['pre_post_plot']}"
         )
         figures.append(fig3)
-    
+
     # Effect size forest plot
     effect_sizes = {'self_efficacy_change': se_results['effect_size']}
     if stress_results:
         effect_sizes['post_stress'] = stress_results['effect_size']
-    
+
     fig4 = plot_effect_size_forest(
         effect_sizes, participant_data,
         f"{output_dir}/{OUTPUT_FILES['effect_sizes_plot']}"
     )
     figures.append(fig4)
-    
+
     results['figures'] = figures
-    
+
     print("✅ Primary analysis complete!")
-    
+
     return results
 
 
 def run_secondary_analyses(participant_data, case_data=None, output_dir='.'):
     """
     Run secondary and exploratory analyses.
-    
+
     Parameters:
     -----------
     participant_data : pandas.DataFrame
@@ -164,7 +165,7 @@ def run_secondary_analyses(participant_data, case_data=None, output_dir='.'):
         Case-level dataset (optional)
     output_dir : str
         Directory for output files
-        
+
     Returns:
     --------
     dict : Secondary analysis results
@@ -172,70 +173,231 @@ def run_secondary_analyses(participant_data, case_data=None, output_dir='.'):
     print("\n" + "="*60)
     print("🔍 SECONDARY ANALYSES")
     print("="*60)
-    
+
     results = {}
-    
+
     # 1. Demographic subgroup analyses
     print("\n👥 1. DEMOGRAPHIC SUBGROUP ANALYSES")
     print("-" * 40)
-    
+
     # Add demographic grouping variables
     participant_data_grouped = add_demographic_groups(participant_data)
-    
+
     # Age group analysis
     if 'age_group' in participant_data_grouped.columns:
         age_results = analyze_subgroups(
             participant_data_grouped, 'age_group', 'self_efficacy_change'
         )
-        
+
         for age_group, result in age_results.items():
             if 'error' not in result:
-                print(f"  Age group {age_group}: d = {result['effect_size']:.3f}")
+                print(
+                    f"  Age group {age_group}: d = {result['effect_size']:.3f}")
             else:
                 print(f"  Age group {age_group}: {result['error']}")
-        
+
         results['age_subgroups'] = age_results
-    
+
     # 2. Power analysis for full study
     print("\n⚡ 2. POWER ANALYSIS")
     print("-" * 40)
-    
+
     # Get pilot effect size
-    se_results = run_statistical_tests(participant_data, measure_col='self_efficacy_change')
+    se_results = run_statistical_tests(
+        participant_data, measure_col='self_efficacy_change')
     pilot_effect_size = abs(se_results['effect_size'])
-    
+
     # Power for target sample size (N=600)
     power_600 = power_analysis(pilot_effect_size, 300)  # 300 per group
     print(f"Power for N=600 (300 per group): {power_600:.3f}")
-    
+
     # Create power analysis plot
     fig_power = plot_power_analysis(
         [pilot_effect_size], max_n=1000, target_n=600,
         save_name=f"{output_dir}/{OUTPUT_FILES['power_analysis_plot']}"
     )
-    
+
     results['power_analysis'] = {'power_600': power_600, 'figure': fig_power}
-    
-    # 3. Demographics visualization
-    print("\n📊 3. DEMOGRAPHICS VISUALIZATION")
+
+    # 3. Baseline Balance Analysis (Randomization Check)
+    print("\n⚖️ 3. BASELINE BALANCE ANALYSIS (RANDOMIZATION CHECK)")
     print("-" * 40)
-    
+
+    try:
+        from visualization import plot_baseline_comparison, analyze_baseline_differences
+
+        # Analyze baseline differences between groups
+        baseline_stats = analyze_baseline_differences(participant_data)
+
+        # Print summary of baseline differences
+        print("  Baseline Differences Between Groups:")
+        for _, row in baseline_stats.iterrows():
+            significance = "⚠️ SIGNIFICANT" if row['significant'] else "✓ Non-significant"
+            print(
+                f"    {row['dimension'].title()}: d = {row['effect_size']:.3f}, p = {row['p_value']:.3f} ({significance})")
+            if row['significant']:
+                print(
+                    f"      → AI mean: {row['ai_mean']:.3f}, Control mean: {row['control_mean']:.3f}")
+
+        # Check if any significant baseline differences exist
+        significant_diffs = baseline_stats[baseline_stats['significant']]
+        if len(significant_diffs) > 0:
+            print(
+                f"\n  ⚠️  WARNING: {len(significant_diffs)} significant baseline differences detected!")
+            print(
+                "     This suggests potential randomization failure or systematic bias.")
+        else:
+            print(
+                "\n  ✅ No significant baseline differences - randomization appears successful.")
+
+        # Create baseline comparison visualization
+        fig_baseline = plot_baseline_comparison(participant_data, output_dir)
+
+        results['baseline_analysis'] = {
+            'baseline_stats': baseline_stats,
+            'significant_differences': len(significant_diffs),
+            'figure': fig_baseline
+        }
+
+    except Exception as e:
+        print(f"❌ Error during baseline analysis: {e}")
+        results['baseline_analysis'] = {'error': str(e)}
+
+    # 4. Baseline-Adjusted Analysis
+    print("\n🔧 4. BASELINE-ADJUSTED ANALYSIS")
+    print("-" * 40)
+
+    try:
+        from statistical_analysis import run_dimensional_baseline_adjusted_analysis
+
+        # Run baseline-adjusted analysis for all dimensions
+        adjusted_results = run_dimensional_baseline_adjusted_analysis(
+            participant_data)
+
+        # Print results comparing raw vs adjusted effect sizes
+        print("  Baseline-Adjusted Effect Sizes (controlling for pre-intervention scores):")
+        print("  " + "="*70)
+        print(
+            f"  {'Dimension':<12} {'Raw d':<8} {'Adjusted d':<12} {'Adj. p-value':<12} {'Significant':<12}")
+        print("  " + "-"*70)
+
+        for dim_label, dim_results in adjusted_results.items():
+            if 'error' not in dim_results:
+                raw_d = dim_results.get('raw_effect_size', 0)
+                adj_d = dim_results.get('adjusted_effect_size', 0)
+                adj_p = dim_results.get(
+                    'adjusted_p_value', dim_results.get('ancova_p_value', 1.0))
+                significant = "Yes" if dim_results.get(
+                    'significant', False) else "No"
+
+                print(
+                    f"  {dim_label.title():<12} {raw_d:>6.3f}   {adj_d:>8.3f}     {adj_p:>8.3f}     {significant:<12}")
+            else:
+                print(
+                    f"  {dim_label.title():<12} Error: {dim_results['error']}")
+
+        print("  " + "="*70)
+
+        # Summary of changes
+        significant_adjusted = sum(1 for r in adjusted_results.values()
+                                   if 'error' not in r and r.get('significant', False))
+
+        if significant_adjusted > 0:
+            print(
+                f"\n  ✅ {significant_adjusted} dimensions show significant effects after baseline adjustment")
+        else:
+            print(
+                f"\n  ❌ No dimensions show significant effects after controlling for baseline")
+            print("     → This suggests observed effects were due to baseline imbalances")
+
+        # Create baseline-adjusted visualizations
+        try:
+            from visualization import plot_baseline_adjusted_comparison, plot_baseline_adjusted_summary_table
+
+            fig_adjusted_comparison = plot_baseline_adjusted_comparison(
+                adjusted_results, output_dir)
+            fig_adjusted_table = plot_baseline_adjusted_summary_table(
+                adjusted_results, output_dir)
+
+            results['baseline_adjusted_analysis'] = {
+                'adjusted_results': adjusted_results,
+                'significant_dimensions': significant_adjusted,
+                'figures': [fig_adjusted_comparison, fig_adjusted_table]
+            }
+
+        except Exception as viz_error:
+            print(
+                f"❌ Error creating baseline-adjusted visualizations: {viz_error}")
+            results['baseline_adjusted_analysis'] = {
+                'adjusted_results': adjusted_results,
+                'significant_dimensions': significant_adjusted,
+                'visualization_error': str(viz_error)
+            }
+
+    except Exception as e:
+        print(f"❌ Error during baseline-adjusted analysis: {e}")
+        results['baseline_adjusted_analysis'] = {'error': str(e)}
+
+    # 5. Self-Efficacy Dimensional Analysis
+    print("\n🔍 5. SELF-EFFICACY DIMENSIONAL ANALYSIS")
+    print("-" * 40)
+
+    try:
+        from data_processing import analyze_self_efficacy_dimensions, get_dimension_summary_stats
+        from visualization import (plot_self_efficacy_dimensions_trajectory,
+                                   plot_self_efficacy_dimensions_change,
+                                   plot_self_efficacy_dimensions_effect_sizes)
+
+        # Analyze each dimension separately
+        dimension_results = analyze_self_efficacy_dimensions(participant_data)
+
+        # Print results for each dimension
+        for dim_label, dim_results in dimension_results.items():
+            if 'error' not in dim_results:
+                effect_size = dim_results.get('effect_size', 0)
+                p_value = dim_results.get('recommended_p', 1.0)
+                print(
+                    f"  {dim_label.title()}: d = {effect_size:.3f}, p = {p_value:.3f}")
+            else:
+                print(f"  {dim_label.title()}: {dim_results['error']}")
+
+        # Create dimensional visualizations
+        fig_trajectory = plot_self_efficacy_dimensions_trajectory(
+            participant_data, output_dir)
+        fig_change = plot_self_efficacy_dimensions_change(
+            participant_data, output_dir)
+        fig_effects = plot_self_efficacy_dimensions_effect_sizes(
+            dimension_results, output_dir)
+
+        results['dimensional_analysis'] = {
+            'results': dimension_results,
+            'figures': [fig_trajectory, fig_change, fig_effects]
+        }
+
+    except Exception as e:
+        print(f"❌ Error during dimensional analysis: {e}")
+        results['dimensional_analysis'] = {'error': str(e)}
+
+    # 6. Demographics visualization
+    print("\n📊 6. DEMOGRAPHICS VISUALIZATION")
+    print("-" * 40)
+
     # Age distribution
     if 'age' in participant_data.columns:
         fig_age = plot_demographics_distribution(
             participant_data, 'age', f"{output_dir}/demographics_age"
         )
         results['demographics_plots'] = [fig_age]
-    
+
     print("✅ Secondary analyses complete!")
-    
+
     return results
 
 
-def run_export_pipeline(participant_data, case_data=None, output_dir='.'):
+def run_export_pipeline(participant_data, case_data=None, output_dir='.', secondary_results=None):
     """
     Run the export and reporting pipeline.
-    
+
     Parameters:
     -----------
     participant_data : pandas.DataFrame
@@ -244,7 +406,9 @@ def run_export_pipeline(participant_data, case_data=None, output_dir='.'):
         Case-level dataset (optional)
     output_dir : str
         Directory for output files
-        
+    secondary_results : dict
+        Secondary analysis results including dimensional analysis
+
     Returns:
     --------
     dict : Exported file paths
@@ -252,18 +416,28 @@ def run_export_pipeline(participant_data, case_data=None, output_dir='.'):
     print("\n" + "="*60)
     print("📄 EXPORT AND REPORTING")
     print("="*60)
-    
+
+    # Extract dimensional results if available
+    dimension_results = None
+    if secondary_results and 'dimensional_analysis' in secondary_results:
+        dim_analysis = secondary_results['dimensional_analysis']
+        if 'results' in dim_analysis:
+            dimension_results = dim_analysis['results']
+
     # Export all publication materials
-    exported_files = export_publication_materials(participant_data, output_dir)
-    
+    exported_files = export_publication_materials(
+        participant_data, output_dir, dimension_results=dimension_results
+    )
+
     # Create comprehensive analysis report
-    report_path = create_analysis_report(participant_data, case_data, output_dir)
+    report_path = create_analysis_report(
+        participant_data, case_data, output_dir)
     if report_path:
         exported_files['report'] = report_path
-    
+
     # Print file list
     print_file_list(exported_files)
-    
+
     return exported_files
 
 
@@ -288,50 +462,52 @@ def main():
         '--skip-export', action='store_true',
         help='Skip export pipeline'
     )
-    
+
     args = parser.parse_args()
-    
+
     # Create output directory if it doesn't exist
     output_dir = Path(args.output)
     output_dir.mkdir(exist_ok=True)
-    
+
     # Print header
     print_header()
-    
+
     try:
         # Load and process data
         print("\n🔄 LOADING DATA")
         print("-" * 40)
-        raw_data, participant_data, case_data = load_and_process_data(args.data)
-        
+        raw_data, participant_data, case_data = load_and_process_data(
+            args.data)
+
         # Print data summary
         summary = get_data_summary(participant_data, case_data)
         print(f"📊 Data Summary:")
         for key, value in summary.items():
             print(f"   {key.replace('_', ' ').title()}: {value}")
-        
+
         # Run primary analysis
-        primary_results = run_primary_analysis(participant_data, str(output_dir))
-        
+        primary_results = run_primary_analysis(
+            participant_data, str(output_dir))
+
         # Run secondary analyses (unless skipped)
         secondary_results = {}
         if not args.skip_secondary:
             secondary_results = run_secondary_analyses(
                 participant_data, case_data, str(output_dir)
             )
-        
+
         # Run export pipeline (unless skipped)
         exported_files = {}
         if not args.skip_export:
             exported_files = run_export_pipeline(
-                participant_data, case_data, str(output_dir)
+                participant_data, case_data, str(output_dir), secondary_results
             )
-        
+
         # Final summary
         print("\n" + "="*60)
         print("✅ ANALYSIS COMPLETE!")
         print("="*60)
-        
+
         print("\n📋 NEXT STEPS FOR FULL STUDY")
         print("-" * 40)
         print("1. Review baseline imbalances - consider stratified randomization")
@@ -339,10 +515,10 @@ def main():
         print("3. Consider stress as co-primary outcome given promising results")
         print("4. Examine interaction patterns in AI group for mechanism insights")
         print("5. Plan subgroup analyses for demographics and baseline characteristics")
-        
+
         print(f"\n📁 Output saved to: {output_dir}")
         print("\n🎯 Ready for manuscript preparation and full study planning!")
-        
+
         return {
             'primary_results': primary_results,
             'secondary_results': secondary_results,
@@ -353,12 +529,12 @@ def main():
                 'case_data': case_data
             }
         }
-        
+
     except FileNotFoundError:
         print(f"❌ Error: Data file '{args.data}' not found.")
         print("   Please check the file path and try again.")
         sys.exit(1)
-        
+
     except Exception as e:
         print(f"❌ Error during analysis: {e}")
         import traceback
@@ -376,7 +552,7 @@ if __name__ == "__main__":
         print("\n🔧 INTERACTIVE MODE")
         print("-" * 40)
         print("Loading data and making functions available...")
-        
+
         try:
             raw_data, participant_data, case_data = load_and_process_data()
             print("✅ Data loaded successfully!")
@@ -386,7 +562,7 @@ if __name__ == "__main__":
             print("\nExample usage:")
             print("  results = run_primary_analysis(participant_data)")
             print("  quick_plot('self_efficacy_change', data=participant_data)")
-            
+
         except FileNotFoundError:
             print("❌ Default data file 'output.csv' not found.")
             print("   Use command line mode with --data flag to specify file path.")

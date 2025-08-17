@@ -444,3 +444,273 @@ def power_analysis(effect_size, sample_size_per_group, alpha=None):
         power = stats.norm.cdf(z_score)
 
         return max(0, min(1, power))  # Bound between 0 and 1
+
+
+def run_baseline_adjusted_analysis(data, outcome_col, baseline_col, group_col='group'):
+    """
+    Run baseline-adjusted analysis using ANCOVA-style approach.
+
+    This addresses baseline imbalances by controlling for pre-intervention scores.
+
+    Parameters:
+    -----------
+    data : pandas.DataFrame
+        Dataset containing all variables
+    outcome_col : str
+        Post-intervention outcome column name
+    baseline_col : str 
+        Pre-intervention baseline column name
+    group_col : str
+        Group assignment column name
+
+    Returns:
+    --------
+    dict : Baseline-adjusted analysis results
+    """
+    try:
+        # Try to import statsmodels for proper ANCOVA
+        from statsmodels.stats.anova import anova_lm
+        from statsmodels.formula.api import ols
+        import statsmodels.api as sm
+
+        # Clean data - remove missing values
+        analysis_data = data[[outcome_col, baseline_col, group_col]].dropna()
+
+        if len(analysis_data) < 10:
+            return {'error': 'Insufficient data for baseline-adjusted analysis'}
+
+        # Fit ANCOVA model: outcome ~ group + baseline
+        formula = f'{outcome_col} ~ C({group_col}) + {baseline_col}'
+        model = ols(formula, data=analysis_data).fit()
+
+        # Get ANOVA table
+        anova_results = anova_lm(model, typ=2)
+
+        # Extract group effect results
+        group_p_value = anova_results.loc[f'C({group_col})', 'PR(>F)']
+        group_f_stat = anova_results.loc[f'C({group_col})', 'F']
+
+        # Calculate adjusted means (least squares means)
+        # Get group coefficients from model
+        group_coef = model.params.get(
+            'C(group)[T.Control]', 0)  # Control vs AI
+        baseline_coef = model.params[baseline_col]
+        intercept = model.params['Intercept']
+
+        # Calculate overall baseline mean for adjustment
+        baseline_mean = analysis_data[baseline_col].mean()
+
+        # Adjusted means (at mean baseline value)
+        ai_adjusted_mean = intercept + baseline_coef * baseline_mean
+        control_adjusted_mean = intercept + group_coef + baseline_coef * baseline_mean
+
+        # Calculate baseline-adjusted effect size
+        pooled_residual_sd = np.sqrt(model.mse_resid)
+        adjusted_mean_diff = ai_adjusted_mean - control_adjusted_mean
+        adjusted_effect_size = adjusted_mean_diff / pooled_residual_sd
+
+        # Get raw group means for comparison
+        ai_raw = analysis_data[analysis_data[group_col]
+                               == 'AI'][outcome_col].mean()
+        control_raw = analysis_data[analysis_data[group_col]
+                                    == 'Control'][outcome_col].mean()
+        raw_effect_size = calculate_effect_size(
+            analysis_data[analysis_data[group_col] == 'AI'][outcome_col],
+            analysis_data[analysis_data[group_col] == 'Control'][outcome_col]
+        )
+
+        # Calculate baseline difference for context
+        ai_baseline = analysis_data[analysis_data[group_col]
+                                    == 'AI'][baseline_col].mean()
+        control_baseline = analysis_data[analysis_data[group_col]
+                                         == 'Control'][baseline_col].mean()
+        baseline_difference = ai_baseline - control_baseline
+
+        return {
+            'n_total': len(analysis_data),
+            'n_ai': len(analysis_data[analysis_data[group_col] == 'AI']),
+            'n_control': len(analysis_data[analysis_data[group_col] == 'Control']),
+
+            # ANCOVA results
+            'ancova_f_stat': group_f_stat,
+            'ancova_p_value': group_p_value,
+            'significant': group_p_value < 0.05,
+
+            # Adjusted results
+            'ai_adjusted_mean': ai_adjusted_mean,
+            'control_adjusted_mean': control_adjusted_mean,
+            'adjusted_mean_difference': adjusted_mean_diff,
+            'adjusted_effect_size': adjusted_effect_size,
+            'adjusted_effect_interpretation': interpret_effect_size(adjusted_effect_size),
+
+            # Raw results for comparison
+            'ai_raw_mean': ai_raw,
+            'control_raw_mean': control_raw,
+            'raw_effect_size': raw_effect_size,
+            'raw_effect_interpretation': interpret_effect_size(raw_effect_size),
+
+            # Baseline information
+            'ai_baseline_mean': ai_baseline,
+            'control_baseline_mean': control_baseline,
+            'baseline_difference': baseline_difference,
+
+            # Model diagnostics
+            'r_squared': model.rsquared,
+            'residual_std_error': pooled_residual_sd,
+            'model_summary': str(model.summary())
+        }
+
+    except ImportError:
+        # Fallback approach without statsmodels
+        return run_baseline_adjusted_fallback(data, outcome_col, baseline_col, group_col)
+    except Exception as e:
+        return {'error': f'Error in baseline-adjusted analysis: {str(e)}'}
+
+
+def run_baseline_adjusted_fallback(data, outcome_col, baseline_col, group_col='group'):
+    """
+    Fallback baseline-adjusted analysis without statsmodels.
+    Uses residual scores approach.
+
+    Parameters:
+    -----------
+    data : pandas.DataFrame
+        Dataset containing all variables
+    outcome_col : str
+        Post-intervention outcome column name
+    baseline_col : str 
+        Pre-intervention baseline column name  
+    group_col : str
+        Group assignment column name
+
+    Returns:
+    --------
+    dict : Baseline-adjusted analysis results
+    """
+    try:
+        # Clean data
+        analysis_data = data[[outcome_col, baseline_col, group_col]].dropna()
+
+        if len(analysis_data) < 10:
+            return {'error': 'Insufficient data for baseline-adjusted analysis'}
+
+        # Method: Linear regression to predict post from pre, then analyze residuals
+        from scipy import stats as scipy_stats
+
+        # Fit regression: post ~ pre (across all participants)
+        x = analysis_data[baseline_col].values
+        y = analysis_data[outcome_col].values
+
+        slope, intercept, r_value, p_value, std_err = scipy_stats.linregress(
+            x, y)
+
+        # Calculate residuals (baseline-adjusted scores)
+        predicted = slope * x + intercept
+        residuals = y - predicted
+
+        # Add residuals to dataframe
+        analysis_data = analysis_data.copy()
+        analysis_data['baseline_adjusted_score'] = residuals
+
+        # Compare residuals between groups
+        ai_residuals = analysis_data[analysis_data[group_col]
+                                     == 'AI']['baseline_adjusted_score']
+        control_residuals = analysis_data[analysis_data[group_col]
+                                          == 'Control']['baseline_adjusted_score']
+
+        # Statistical test on residuals
+        t_stat, p_val = ttest_ind(ai_residuals, control_residuals)
+        effect_size = calculate_effect_size(ai_residuals, control_residuals)
+
+        # Raw comparison for context
+        ai_raw = analysis_data[analysis_data[group_col]
+                               == 'AI'][outcome_col].mean()
+        control_raw = analysis_data[analysis_data[group_col]
+                                    == 'Control'][outcome_col].mean()
+        raw_effect_size = calculate_effect_size(
+            analysis_data[analysis_data[group_col] == 'AI'][outcome_col],
+            analysis_data[analysis_data[group_col] == 'Control'][outcome_col]
+        )
+
+        # Baseline info
+        ai_baseline = analysis_data[analysis_data[group_col]
+                                    == 'AI'][baseline_col].mean()
+        control_baseline = analysis_data[analysis_data[group_col]
+                                         == 'Control'][baseline_col].mean()
+
+        return {
+            'method': 'residual_scores',
+            'n_total': len(analysis_data),
+            'n_ai': len(ai_residuals),
+            'n_control': len(control_residuals),
+
+            # Adjusted results
+            'ai_adjusted_mean': ai_residuals.mean(),
+            'control_adjusted_mean': control_residuals.mean(),
+            'adjusted_mean_difference': ai_residuals.mean() - control_residuals.mean(),
+            'adjusted_effect_size': effect_size,
+            'adjusted_effect_interpretation': interpret_effect_size(effect_size),
+            'adjusted_t_stat': t_stat,
+            'adjusted_p_value': p_val,
+            'significant': p_val < 0.05,
+
+            # Raw results for comparison
+            'ai_raw_mean': ai_raw,
+            'control_raw_mean': control_raw,
+            'raw_effect_size': raw_effect_size,
+            'raw_effect_interpretation': interpret_effect_size(raw_effect_size),
+
+            # Baseline information
+            'ai_baseline_mean': ai_baseline,
+            'control_baseline_mean': control_baseline,
+            'baseline_difference': ai_baseline - control_baseline,
+
+            # Regression diagnostics
+            'baseline_outcome_correlation': r_value,
+            'baseline_outcome_r_squared': r_value**2
+        }
+
+    except Exception as e:
+        return {'error': f'Error in fallback baseline-adjusted analysis: {str(e)}'}
+
+
+def run_dimensional_baseline_adjusted_analysis(participant_data):
+    """
+    Run baseline-adjusted analysis for all self-efficacy dimensions.
+
+    Parameters:
+    -----------
+    participant_data : pandas.DataFrame
+        Participant-level data with dimensional scores
+
+    Returns:
+    --------
+    dict : Baseline-adjusted results for each dimension
+    """
+    from data_processing import get_self_efficacy_dimensions
+
+    dimensions = get_self_efficacy_dimensions()
+    adjusted_results = {}
+
+    for dimension_num, dimension_label in dimensions.items():
+        pre_col = f'pre_se_{dimension_label}'
+        post_col = f'post_se_{dimension_label}'
+
+        if pre_col in participant_data.columns and post_col in participant_data.columns:
+            # Run baseline-adjusted analysis for this dimension
+            dim_results = run_baseline_adjusted_analysis(
+                participant_data, post_col, pre_col, 'group'
+            )
+            dim_results['dimension_label'] = dimension_label
+            dim_results['dimension_number'] = dimension_num
+            adjusted_results[dimension_label] = dim_results
+
+    # Overall self-efficacy
+    if 'pre_self_efficacy' in participant_data.columns and 'post_self_efficacy' in participant_data.columns:
+        overall_results = run_baseline_adjusted_analysis(
+            participant_data, 'post_self_efficacy', 'pre_self_efficacy', 'group'
+        )
+        overall_results['dimension_label'] = 'overall'
+        adjusted_results['overall'] = overall_results
+
+    return adjusted_results
